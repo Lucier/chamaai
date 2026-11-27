@@ -1,25 +1,31 @@
-"use client";
+'use client'
 
-import { useEffect, useState, useSyncExternalStore } from "react";
-import { createPortal } from "react-dom";
-import { Button } from "@/components/ui/button";
-import { InstallIcon } from "@/components/ui/icons";
-import { useToast } from "@/components/ui/providers";
-import { getInstallHelp, getInstallState, subscribeInstall, takeInstallPrompt, type InstallHelp } from "@/lib/pwa-install";
+import { useEffect, useState, useSyncExternalStore } from 'react'
+import { createPortal } from 'react-dom'
+import { Button } from '@/components/ui/button'
+import { InstallIcon } from '@/components/ui/icons'
+import { useToast } from '@/components/ui/providers'
+import {
+  getInstallHelp,
+  getInstallState,
+  subscribeInstall,
+  takeInstallPrompt,
+  type InstallHelp,
+} from '@/lib/pwa-install'
 
 /** Registra o service worker. Só em produção: em `next dev` o cache atrapalharia mais do que ajudaria. */
 export function PwaRegister() {
   useEffect(() => {
     // `serviceWorker` só existe em contexto seguro (HTTPS ou localhost).
-    if (process.env.NODE_ENV !== "production" || !("serviceWorker" in navigator)) return;
+    if (process.env.NODE_ENV !== 'production' || !('serviceWorker' in navigator)) return
     const register = () => {
-      navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" }).catch(() => undefined);
-    };
-    if (document.readyState === "complete") register();
-    else window.addEventListener("load", register, { once: true });
-    return () => window.removeEventListener("load", register);
-  }, []);
-  return null;
+      navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' }).catch(() => undefined)
+    }
+    if (document.readyState === 'complete') register()
+    else window.addEventListener('load', register, { once: true })
+    return () => window.removeEventListener('load', register)
+  }, [])
+  return null
 }
 
 /**
@@ -31,22 +37,22 @@ export function PwaRegister() {
  * `compact`: no cabeçalho, onde o espaço é curto — só o ícone em telas estreitas e rótulo "Instalar" nas demais.
  */
 export function InstallButton({ className, compact = false }: { className?: string; compact?: boolean }) {
-  const state = useSyncExternalStore(subscribeInstall, getInstallState, () => "hidden" as const);
-  const toast = useToast();
-  const [help, setHelp] = useState<InstallHelp | null>(null);
+  const state = useSyncExternalStore(subscribeInstall, getInstallState, () => 'hidden' as const)
+  const toast = useToast()
+  const [help, setHelp] = useState<InstallHelp | null>(null)
 
-  if (state === "hidden") return null;
+  if (state === 'hidden') return null
 
   async function install() {
-    const prompt = state === "prompt" ? takeInstallPrompt() : null;
-    if (!prompt) return setHelp(getInstallHelp());
+    const prompt = state === 'prompt' ? takeInstallPrompt() : null
+    if (!prompt) return setHelp(getInstallHelp())
     try {
-      await prompt.prompt();
-      const { outcome } = await prompt.userChoice;
-      if (outcome === "accepted") toast("App instalado! Procure o Chama Aí na sua tela inicial.", "success");
+      await prompt.prompt()
+      const { outcome } = await prompt.userChoice
+      if (outcome === 'accepted') toast('App instalado! Procure o Chama Aí na sua tela inicial.', 'success')
     } catch {
       // o prompt nativo falhou: o passo a passo ainda leva o usuário até lá
-      setHelp(getInstallHelp());
+      setHelp(getInstallHelp())
     }
   }
 
@@ -58,7 +64,7 @@ export function InstallButton({ className, compact = false }: { className?: stri
       </Button>
       {help && <InstallHelpDialog help={help} onClose={() => setHelp(null)} />}
     </>
-  );
+  )
 }
 
 /**
@@ -67,10 +73,10 @@ export function InstallButton({ className, compact = false }: { className?: stri
  */
 function InstallHelpDialog({ help, onClose }: { help: InstallHelp; onClose: () => void }) {
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
 
   return createPortal(
     <div
@@ -88,7 +94,9 @@ function InstallHelpDialog({ help, onClose }: { help: InstallHelp; onClose: () =
         <ol className="mt-4 flex list-none flex-col gap-3">
           {help.steps.map((step, i) => (
             <li key={step} className="flex gap-3">
-              <span className="grid size-6 shrink-0 place-items-center rounded-full bg-primary-soft text-[12px] font-bold text-primary">{i + 1}</span>
+              <span className="grid size-6 shrink-0 place-items-center rounded-full bg-primary-soft text-[12px] font-bold text-primary">
+                {i + 1}
+              </span>
               <span>{step}</span>
             </li>
           ))}
@@ -100,5 +108,5 @@ function InstallHelpDialog({ help, onClose }: { help: InstallHelp; onClose: () =
       </div>
     </div>,
     document.body,
-  );
+  )
 }

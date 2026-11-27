@@ -1,6 +1,6 @@
-import Link from "next/link";
-import { buttonClasses } from "@/components/ui/button";
-import { EmptyState } from "@/components/ui/card";
+import Link from 'next/link'
+import { buttonClasses } from '@/components/ui/button'
+import { EmptyState } from '@/components/ui/card'
 
 export default function NotFound() {
   return (
@@ -15,5 +15,5 @@ export default function NotFound() {
     >
       Esse endereço não existe ou o perfil não está mais disponível.
     </EmptyState>
-  );
+  )
 }

@@ -1,0 +1,9 @@
+# O Prettier já respeita o .gitignore (node_modules, .next, out, coverage, certs, uploads, next-env.d.ts, *.tsbuildinfo).
+# Aqui ficam só os tipos de arquivo que NÃO formatamos com ele: texto/dados com formato próprio ou gerado.
+package-lock.json
+*.json
+*.md
+*.html
+*.yml
+*.yaml
+*.sql

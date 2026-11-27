@@ -159,6 +159,29 @@ Outras mudanças:
 - "Uma avaliação por aparelho" usa um cookie `httpOnly` (antes, `localStorage`). Continua sendo uma barreira leve, não anti-fraude.
 - Links antigos `#prestador/<id>` viraram `/prestador/<id>`.
 
+## Formatação e lint (Prettier + ESLint)
+
+O estilo é **aspas simples** e **sem ponto-e-vírgula**, definido em `.prettierrc.json` (única fonte da verdade, lida também pelo editor):
+
+```json
+{ "semi": false, "singleQuote": true, "printWidth": 120 }
+```
+
+```bash
+npm run format        # formata tudo com o Prettier (ts, tsx, js, mjs, mts, css)
+npm run format:check  # só confere (bom para CI); não altera nada
+npm run lint          # ESLint — a regra `prettier/prettier` acusa qualquer desvio de formatação
+npm run lint:fix      # ESLint com correção automática (também formata)
+```
+
+- O ESLint usa `eslint-plugin-prettier` (em `eslint.config.mjs`, sempre por último): `eslint-config-prettier` desliga as regras de estilo que
+  brigariam com o Prettier, e `prettier/prettier` aplica o `.prettierrc.json`. Por isso não há regras `quotes`/`semi` nativas do ESLint (obsoletas).
+- **Atributos JSX** (`className="…"`) continuam com aspas duplas: é a convenção do JSX. Para trocar, adicione `"jsxSingleQuote": true`.
+- O Prettier mantém aspas duplas em strings que contêm aspas simples (ex.: SQL com `'approved'`) para não encher o código de `\'`.
+- Sem ponto-e-vírgula, o Prettier insere um `;` defensivo só quando a linha começa com `(`, `[` ou `` ` `` (ver ASI). É esperado.
+- Não são formatados: `.md`, `.json`, `.html`, `.yml`, `.sql` e o que está no `.gitignore` (ver `.prettierignore`).
+- `printWidth: 120` foi escolhido medindo o código existente: com o padrão (80) o Prettier reescreveria ~4.200 linhas só de reflow; com 120, ~2.800.
+
 ## Estrutura
 
 ```

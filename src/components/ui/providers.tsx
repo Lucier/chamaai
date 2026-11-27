@@ -1,64 +1,64 @@
-"use client";
+'use client'
 
-import clsx from "clsx";
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
-import { Button } from "./button";
+import clsx from 'clsx'
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
+import { Button } from './button'
 
 /* ---------------- Toasts ---------------- */
 
-type ToastType = "info" | "success" | "error";
-type ToastItem = { id: number; message: string; type: ToastType };
-type ToastFn = (message: string, type?: ToastType) => void;
+type ToastType = 'info' | 'success' | 'error'
+type ToastItem = { id: number; message: string; type: ToastType }
+type ToastFn = (message: string, type?: ToastType) => void
 
 /* ---------------- Confirmação ---------------- */
 
-type ConfirmOptions = { title: string; message: string; confirmLabel?: string };
-type ConfirmFn = (options: ConfirmOptions) => Promise<boolean>;
+type ConfirmOptions = { title: string; message: string; confirmLabel?: string }
+type ConfirmFn = (options: ConfirmOptions) => Promise<boolean>
 
-const ToastContext = createContext<ToastFn | null>(null);
-const ConfirmContext = createContext<ConfirmFn | null>(null);
+const ToastContext = createContext<ToastFn | null>(null)
+const ConfirmContext = createContext<ConfirmFn | null>(null)
 
 export const useToast = () => {
-  const ctx = useContext(ToastContext);
-  if (!ctx) throw new Error("useToast precisa estar dentro de <Providers>");
-  return ctx;
-};
+  const ctx = useContext(ToastContext)
+  if (!ctx) throw new Error('useToast precisa estar dentro de <Providers>')
+  return ctx
+}
 export const useConfirm = () => {
-  const ctx = useContext(ConfirmContext);
-  if (!ctx) throw new Error("useConfirm precisa estar dentro de <Providers>");
-  return ctx;
-};
+  const ctx = useContext(ConfirmContext)
+  if (!ctx) throw new Error('useConfirm precisa estar dentro de <Providers>')
+  return ctx
+}
 
 export function Providers({ children }: { children: ReactNode }) {
-  const [toasts, setToasts] = useState<ToastItem[]>([]);
-  const nextId = useRef(0);
+  const [toasts, setToasts] = useState<ToastItem[]>([])
+  const nextId = useRef(0)
 
-  const toast = useCallback<ToastFn>((message, type = "info") => {
-    const id = ++nextId.current;
-    setToasts((t) => [...t, { id, message, type }]);
-    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), type === "error" ? 5000 : 3200);
-  }, []);
+  const toast = useCallback<ToastFn>((message, type = 'info') => {
+    const id = ++nextId.current
+    setToasts((t) => [...t, { id, message, type }])
+    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), type === 'error' ? 5000 : 3200)
+  }, [])
 
-  const [dialog, setDialog] = useState<(ConfirmOptions & { resolve: (v: boolean) => void }) | null>(null);
-  const confirm = useCallback<ConfirmFn>((options) => new Promise((resolve) => setDialog({ ...options, resolve })), []);
+  const [dialog, setDialog] = useState<(ConfirmOptions & { resolve: (v: boolean) => void }) | null>(null)
+  const confirm = useCallback<ConfirmFn>((options) => new Promise((resolve) => setDialog({ ...options, resolve })), [])
   const close = (value: boolean) => {
-    dialog?.resolve(value);
-    setDialog(null);
-  };
+    dialog?.resolve(value)
+    setDialog(null)
+  }
 
   useEffect(() => {
-    if (!dialog) return;
+    if (!dialog) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        dialog.resolve(false);
-        setDialog(null);
+      if (e.key === 'Escape') {
+        e.stopPropagation()
+        dialog.resolve(false)
+        setDialog(null)
       }
-    };
+    }
     // capture: o Esc fecha só a confirmação, não o modal de perfil por baixo
-    window.addEventListener("keydown", onKey, true);
-    return () => window.removeEventListener("keydown", onKey, true);
-  }, [dialog]);
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
+  }, [dialog])
 
   return (
     <ToastContext.Provider value={toast}>
@@ -83,7 +83,7 @@ export function Providers({ children }: { children: ReactNode }) {
                   Cancelar
                 </Button>
                 <Button variant="danger" onClick={() => close(true)} autoFocus>
-                  {dialog.confirmLabel ?? "Confirmar"}
+                  {dialog.confirmLabel ?? 'Confirmar'}
                 </Button>
               </div>
             </div>
@@ -97,12 +97,12 @@ export function Providers({ children }: { children: ReactNode }) {
           {toasts.map((t) => (
             <div
               key={t.id}
-              role={t.type === "error" ? "alert" : "status"}
+              role={t.type === 'error' ? 'alert' : 'status'}
               className={clsx(
-                "pointer-events-auto animate-rise rounded-lg px-[18px] py-3 sm:max-w-[420px] text-sm font-medium text-white shadow-[0_8px_24px_rgba(0,0,0,0.2)]",
-                t.type === "success" && "bg-success",
-                t.type === "error" && "bg-danger",
-                t.type === "info" && "bg-ink",
+                'pointer-events-auto animate-rise rounded-lg px-[18px] py-3 sm:max-w-[420px] text-sm font-medium text-white shadow-[0_8px_24px_rgba(0,0,0,0.2)]',
+                t.type === 'success' && 'bg-success',
+                t.type === 'error' && 'bg-danger',
+                t.type === 'info' && 'bg-ink',
               )}
             >
               {t.message}
@@ -111,5 +111,5 @@ export function Providers({ children }: { children: ReactNode }) {
         </div>
       </ConfirmContext.Provider>
     </ToastContext.Provider>
-  );
+  )
 }

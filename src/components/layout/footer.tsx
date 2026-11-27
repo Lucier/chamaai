@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { InstallButton } from "./pwa";
+import Link from 'next/link'
+import { InstallButton } from './pwa'
 
 export function Footer() {
   return (
@@ -9,12 +9,12 @@ export function Footer() {
         <InstallButton className="md:hidden" />
         <span>© {new Date().getFullYear()} Chama Aí · Profissionais de confiança da sua cidade</span>
         <span>
-          É prestador?{" "}
+          É prestador?{' '}
           <Link href="/cadastro" className="font-semibold text-primary no-underline">
             Cadastre-se grátis
           </Link>
         </span>
       </div>
     </footer>
-  );
+  )
 }

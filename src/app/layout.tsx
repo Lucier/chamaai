@@ -1,24 +1,29 @@
-import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
-import type { ReactNode } from "react";
-import { Footer } from "@/components/layout/footer";
-import { PwaRegister } from "@/components/layout/pwa";
-import { Topbar } from "@/components/layout/topbar";
-import { Providers } from "@/components/ui/providers";
-import "./globals.css";
+import type { Metadata, Viewport } from 'next'
+import { Inter } from 'next/font/google'
+import type { ReactNode } from 'react'
+import { Footer } from '@/components/layout/footer'
+import { PwaRegister } from '@/components/layout/pwa'
+import { Topbar } from '@/components/layout/topbar'
+import { Providers } from '@/components/ui/providers'
+import './globals.css'
 
-const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-inter", display: "swap" });
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-inter',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
-  title: { default: "Chama Aí — Profissionais de confiança perto de você", template: "%s | Chama Aí" },
+  title: { default: 'Chama Aí — Profissionais de confiança perto de você', template: '%s | Chama Aí' },
   description:
-    "Encontre eletricistas, diaristas, encanadores e outros profissionais da sua cidade e fale direto pelo WhatsApp.",
-  applicationName: "Chama Aí",
+    'Encontre eletricistas, diaristas, encanadores e outros profissionais da sua cidade e fale direto pelo WhatsApp.',
+  applicationName: 'Chama Aí',
   // iOS: abre em tela cheia quando adicionado à Tela de Início. O ícone vem de app/apple-icon.png.
-  appleWebApp: { capable: true, title: "Chama Aí", statusBarStyle: "default" },
-};
+  appleWebApp: { capable: true, title: 'Chama Aí', statusBarStyle: 'default' },
+}
 
-export const viewport: Viewport = { themeColor: "#0F6B73", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { themeColor: '#0F6B73', width: 'device-width', initialScale: 1 }
 
 export default function RootLayout({ children, modal }: { children: ReactNode; modal: ReactNode }) {
   return (
@@ -33,5 +38,5 @@ export default function RootLayout({ children, modal }: { children: ReactNode; m
         </Providers>
       </body>
     </html>
-  );
+  )
 }

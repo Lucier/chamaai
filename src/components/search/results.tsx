@@ -1,26 +1,28 @@
-import Link from "next/link";
-import { buttonClasses } from "@/components/ui/button";
-import { Card, EmptyState } from "@/components/ui/card";
-import { pluralize } from "@/lib/format";
-import type { SearchFilters } from "@/lib/schemas";
-import { searchProviders } from "@/server/queries";
-import { ClearFiltersButton } from "./clear-filters";
-import { ProviderCard } from "./provider-card";
+import Link from 'next/link'
+import { buttonClasses } from '@/components/ui/button'
+import { Card, EmptyState } from '@/components/ui/card'
+import { pluralize } from '@/lib/format'
+import type { SearchFilters } from '@/lib/schemas'
+import { searchProviders } from '@/server/queries'
+import { ClearFiltersButton } from './clear-filters'
+import { ProviderCard } from './provider-card'
 
 export function hasActiveFilters(f: SearchFilters) {
-  return Boolean(f.q || f.categoria || f.cidade);
+  return Boolean(f.q || f.categoria || f.cidade)
 }
 
 export async function Results({ filters, totalApproved }: { filters: SearchFilters; totalApproved: number }) {
-  const providers = await searchProviders(filters);
-  const active = hasActiveFilters(filters);
-  const n = providers.length;
+  const providers = await searchProviders(filters)
+  const active = hasActiveFilters(filters)
+  const n = providers.length
 
   return (
     <>
       <div className="mt-6 mb-4 flex flex-wrap items-center justify-between gap-4">
         <h2 aria-live="polite">
-          {n === 0 ? "Nenhum profissional encontrado" : `${n} ${pluralize(n, "profissional encontrado", "profissionais encontrados")}`}
+          {n === 0
+            ? 'Nenhum profissional encontrado'
+            : `${n} ${pluralize(n, 'profissional encontrado', 'profissionais encontrados')}`}
         </h2>
         {active && <ClearFiltersButton ordem={filters.ordem} />}
       </div>
@@ -28,19 +30,19 @@ export async function Results({ filters, totalApproved }: { filters: SearchFilte
       {n === 0 ? (
         <EmptyState
           icon="🔍"
-          title={totalApproved ? "Ninguém com esses filtros ainda" : "Ainda não há profissionais cadastrados"}
+          title={totalApproved ? 'Ninguém com esses filtros ainda' : 'Ainda não há profissionais cadastrados'}
           actions={
             <>
               {active && <ClearFiltersButton ordem={filters.ordem} />}
-              <Link href="/cadastro" className={buttonClasses({ variant: "accent" })}>
+              <Link href="/cadastro" className={buttonClasses({ variant: 'accent' })}>
                 Sou prestador, quero me cadastrar
               </Link>
             </>
           }
         >
           {totalApproved
-            ? "Tente outra palavra, outra cidade ou limpe os filtros."
-            : "Seja o primeiro a divulgar seu trabalho por aqui."}
+            ? 'Tente outra palavra, outra cidade ou limpe os filtros.'
+            : 'Seja o primeiro a divulgar seu trabalho por aqui.'}
         </EmptyState>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fill,minmax(270px,1fr))]">
@@ -50,7 +52,7 @@ export async function Results({ filters, totalApproved }: { filters: SearchFilte
         </div>
       )}
     </>
-  );
+  )
 }
 
 export function ResultsSkeleton() {
@@ -72,5 +74,5 @@ export function ResultsSkeleton() {
         ))}
       </div>
     </>
-  );
+  )
 }

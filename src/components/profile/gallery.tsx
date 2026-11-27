@@ -1,16 +1,16 @@
-"use client";
+'use client'
 
-import clsx from "clsx";
-import { useState } from "react";
-import { Cover } from "@/components/ui/provider-visuals";
-import type { Provider } from "@/lib/types";
+import clsx from 'clsx'
+import { useState } from 'react'
+import { Cover } from '@/components/ui/provider-visuals'
+import type { Provider } from '@/lib/types'
 
-export function Gallery({ provider }: { provider: Pick<Provider, "photos" | "name" | "category"> }) {
-  const { photos, name } = provider;
-  const [current, setCurrent] = useState(0);
+export function Gallery({ provider }: { provider: Pick<Provider, 'photos' | 'name' | 'category'> }) {
+  const { photos, name } = provider
+  const [current, setCurrent] = useState(0)
 
   if (!photos.length) {
-    return <Cover provider={provider} className="aspect-[16/6] text-[72px] md:rounded-t-xl" />;
+    return <Cover provider={provider} className="aspect-[16/6] text-[72px] md:rounded-t-xl" />
   }
   return (
     <>
@@ -34,8 +34,10 @@ export function Gallery({ provider }: { provider: Pick<Provider, "photos" | "nam
                 src={url}
                 alt=""
                 className={clsx(
-                  "h-12 w-full rounded-lg border-2 object-cover transition",
-                  i === current ? "border-primary opacity-100" : "border-transparent opacity-75 hover:border-primary hover:opacity-100",
+                  'h-12 w-full rounded-lg border-2 object-cover transition',
+                  i === current
+                    ? 'border-primary opacity-100'
+                    : 'border-transparent opacity-75 hover:border-primary hover:opacity-100',
                 )}
               />
             </button>
@@ -43,5 +45,5 @@ export function Gallery({ provider }: { provider: Pick<Provider, "photos" | "nam
         </div>
       )}
     </>
-  );
+  )
 }

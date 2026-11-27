@@ -1,32 +1,32 @@
-import Link from "next/link";
-import { Suspense } from "react";
-import { Results, ResultsSkeleton } from "@/components/search/results";
-import { ChipRow, chipClasses } from "@/components/ui/chip";
-import { SearchFilters } from "@/components/search/search-filters";
-import { CATEGORY_NAMES, categoryIcon } from "@/lib/constants";
-import { searchParamsSchema, type SearchFilters as Filters } from "@/lib/schemas";
-import { searchHref } from "@/lib/search-url";
-import { getFilterOptions } from "@/server/queries";
+import Link from 'next/link'
+import { Suspense } from 'react'
+import { Results, ResultsSkeleton } from '@/components/search/results'
+import { ChipRow, chipClasses } from '@/components/ui/chip'
+import { SearchFilters } from '@/components/search/search-filters'
+import { CATEGORY_NAMES, categoryIcon } from '@/lib/constants'
+import { searchParamsSchema, type SearchFilters as Filters } from '@/lib/schemas'
+import { searchHref } from '@/lib/search-url'
+import { getFilterOptions } from '@/server/queries'
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic'
 
-type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
+type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
 export default async function SearchPage({ searchParams }: Props) {
-  const parsed: Filters = searchParamsSchema.parse(await searchParams);
+  const parsed: Filters = searchParamsSchema.parse(await searchParams)
 
   // Opções dos filtros. Valor da URL que não existe mais (ex.: prestador pausado) vira "Todos".
-  const options = await getFilterOptions();
-  const byCategory = new Map(options.categories.map((c) => [c.name, c.count]));
+  const options = await getFilterOptions()
+  const byCategory = new Map(options.categories.map((c) => [c.name, c.count]))
   const categories = [
     ...CATEGORY_NAMES.filter((c) => byCategory.has(c)),
     ...options.categories.map((c) => c.name).filter((c) => !(CATEGORY_NAMES as readonly string[]).includes(c)),
-  ];
+  ]
   const filters: Filters = {
     ...parsed,
-    categoria: categories.includes(parsed.categoria) ? parsed.categoria : "",
-    cidade: options.cities.includes(parsed.cidade) ? parsed.cidade : "",
-  };
+    categoria: categories.includes(parsed.categoria) ? parsed.categoria : '',
+    cidade: options.cities.includes(parsed.cidade) ? parsed.cidade : '',
+  }
 
   return (
     <section aria-labelledby="t-search">
@@ -35,14 +35,15 @@ export default async function SearchPage({ searchParams }: Props) {
           Encontre um profissional de confiança perto de você
         </h1>
         <p className="mt-2 max-w-[620px] text-[#cfe5e7]">
-          Eletricistas, diaristas, encanadores e muito mais. Veja avaliações, compare preços e fale direto pelo WhatsApp.
+          Eletricistas, diaristas, encanadores e muito mais. Veja avaliações, compare preços e fale direto pelo
+          WhatsApp.
         </p>
         <SearchFilters filters={filters} categories={categories} cities={options.cities} />
       </div>
 
       <ChipRow label="Categorias" className="mt-6">
         <Link
-          href={searchHref({ ...filters, categoria: "" })}
+          href={searchHref({ ...filters, categoria: '' })}
           replace
           scroll={false}
           className={chipClasses(!filters.categoria)}
@@ -66,5 +67,5 @@ export default async function SearchPage({ searchParams }: Props) {
         <Results filters={filters} totalApproved={options.total} />
       </Suspense>
     </section>
-  );
+  )
 }

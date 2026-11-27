@@ -1,10 +1,10 @@
-import Link from "next/link";
-import { PinIcon, WhatsAppIcon } from "@/components/ui/icons";
-import { CategoryTag, Rating } from "@/components/ui/badges";
-import { buttonClasses } from "@/components/ui/button";
-import { Cover, Price } from "@/components/ui/provider-visuals";
-import type { ProviderWithRating } from "@/lib/types";
-import { whatsappLink } from "@/lib/whatsapp";
+import Link from 'next/link'
+import { PinIcon, WhatsAppIcon } from '@/components/ui/icons'
+import { CategoryTag, Rating } from '@/components/ui/badges'
+import { buttonClasses } from '@/components/ui/button'
+import { Cover, Price } from '@/components/ui/provider-visuals'
+import type { ProviderWithRating } from '@/lib/types'
+import { whatsappLink } from '@/lib/whatsapp'
 
 export function ProviderCard({ provider: p }: { provider: ProviderWithRating }) {
   return (
@@ -36,7 +36,7 @@ export function ProviderCard({ provider: p }: { provider: ProviderWithRating }) 
             target="_blank"
             rel="noopener"
             aria-label={`Chamar ${p.name} no WhatsApp`}
-            className={buttonClasses({ variant: "wa", size: "sm", className: "relative z-10" })}
+            className={buttonClasses({ variant: 'wa', size: 'sm', className: 'relative z-10' })}
           >
             <WhatsAppIcon />
             WhatsApp
@@ -44,5 +44,5 @@ export function ProviderCard({ provider: p }: { provider: ProviderWithRating }) 
         </div>
       </div>
     </article>
-  );
+  )
 }

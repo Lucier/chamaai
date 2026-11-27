@@ -1,20 +1,20 @@
-import { CategoryTag, Rating, StatusPill, Stars } from "@/components/ui/badges";
-import { InnerBox } from "@/components/ui/card";
-import { PinIcon } from "@/components/ui/icons";
-import { Price } from "@/components/ui/provider-visuals";
-import { formatDate, formatRating, pluralize } from "@/lib/format";
-import type { ProviderWithRating } from "@/lib/types";
-import { getReviews } from "@/server/queries";
-import { Gallery } from "./gallery";
-import { ProfileActions } from "./profile-actions";
-import { ReviewForm } from "./review-form";
+import { CategoryTag, Rating, StatusPill, Stars } from '@/components/ui/badges'
+import { InnerBox } from '@/components/ui/card'
+import { PinIcon } from '@/components/ui/icons'
+import { Price } from '@/components/ui/provider-visuals'
+import { formatDate, formatRating, pluralize } from '@/lib/format'
+import type { ProviderWithRating } from '@/lib/types'
+import { getReviews } from '@/server/queries'
+import { Gallery } from './gallery'
+import { ProfileActions } from './profile-actions'
+import { ReviewForm } from './review-form'
 
 /** Conteúdo do perfil — compartilhado entre o modal (rota interceptada) e a página /prestador/[id]. */
 export async function ProfileView({ provider: p }: { provider: ProviderWithRating }) {
-  const reviews = await getReviews(p.id);
-  const approved = p.status === "approved";
-  const firstName = p.name.split(" ")[0];
-  const distribution = [5, 4, 3, 2, 1].map((n) => [n, reviews.filter((r) => r.stars === n).length] as const);
+  const reviews = await getReviews(p.id)
+  const approved = p.status === 'approved'
+  const firstName = p.name.split(' ')[0]
+  const distribution = [5, 4, 3, 2, 1].map((n) => [n, reviews.filter((r) => r.stars === n).length] as const)
 
   return (
     <article>
@@ -56,7 +56,7 @@ export async function ProfileView({ provider: p }: { provider: ProviderWithRatin
               <div>
                 <Stars value={p.avgStars} />
                 <div className="text-[13px] text-muted">
-                  {p.reviewCount} {pluralize(p.reviewCount, "avaliação", "avaliações")}
+                  {p.reviewCount} {pluralize(p.reviewCount, 'avaliação', 'avaliações')}
                 </div>
               </div>
               <div className="grid max-w-[260px] flex-1 grid-cols-[auto_1fr_auto] items-center gap-x-2 gap-y-1 text-xs text-muted max-md:max-w-none max-md:basis-full md:ml-auto">
@@ -86,7 +86,7 @@ export async function ProfileView({ provider: p }: { provider: ProviderWithRatin
         </section>
       </div>
     </article>
-  );
+  )
 }
 
 function DistributionRow({ stars, count, total }: { stars: number; count: number; total: number }) {
@@ -98,5 +98,5 @@ function DistributionRow({ stars, count, total }: { stars: number; count: number
       </span>
       <span>{count}</span>
     </>
-  );
+  )
 }

@@ -1,16 +1,16 @@
-"use client";
+'use client'
 
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
-import { logout } from "@/actions/admin";
-import { Button } from "@/components/ui/button";
-import { PrintIcon } from "@/components/ui/icons";
-import { useToast } from "@/components/ui/providers";
+import { useRouter } from 'next/navigation'
+import { useTransition } from 'react'
+import { logout } from '@/actions/admin'
+import { Button } from '@/components/ui/button'
+import { PrintIcon } from '@/components/ui/icons'
+import { useToast } from '@/components/ui/providers'
 
 export function AdminToolbar() {
-  const router = useRouter();
-  const toast = useToast();
-  const [pending, startTransition] = useTransition();
+  const router = useRouter()
+  const toast = useToast()
+  const [pending, startTransition] = useTransition()
 
   return (
     <div className="flex flex-wrap gap-2 print:hidden">
@@ -20,8 +20,8 @@ export function AdminToolbar() {
         disabled={pending}
         onClick={() =>
           startTransition(() => {
-            router.refresh();
-            toast("Dados atualizados.");
+            router.refresh()
+            toast('Dados atualizados.')
           })
         }
       >
@@ -37,13 +37,13 @@ export function AdminToolbar() {
         disabled={pending}
         onClick={() =>
           startTransition(async () => {
-            await logout();
-            toast("Você saiu do painel.");
+            await logout()
+            toast('Você saiu do painel.')
           })
         }
       >
         Sair
       </Button>
     </div>
-  );
+  )
 }

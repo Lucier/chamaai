@@ -1,13 +1,13 @@
-import Link from "next/link";
-import { WrenchIcon } from "@/components/ui/icons";
-import { getAdmin } from "@/server/auth";
-import { countPending } from "@/server/queries";
-import { NavTabs } from "./nav-tabs";
-import { InstallButton } from "./pwa";
+import Link from 'next/link'
+import { WrenchIcon } from '@/components/ui/icons'
+import { getAdmin } from '@/server/auth'
+import { countPending } from '@/server/queries'
+import { NavTabs } from './nav-tabs'
+import { InstallButton } from './pwa'
 
 export async function Topbar() {
   // O selo de pendentes só aparece para quem está logado como admin.
-  const pending = (await getAdmin()) ? await countPending() : 0;
+  const pending = (await getAdmin()) ? await countPending() : 0
   return (
     // Celular: o header é "sticky" com top negativo igual à altura da linha do logo (h-12). Ao rolar, o logo sai
     // da tela e só as abas ficam coladas no topo (~57px em vez de ~100px de tela perdida). No desktop volta ao normal.
@@ -34,5 +34,5 @@ export async function Topbar() {
         <NavTabs pendingCount={pending} />
       </div>
     </header>
-  );
+  )
 }

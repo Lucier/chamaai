@@ -1,25 +1,25 @@
-"use client";
+'use client'
 
-import { useRouter } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
+import { useRouter } from 'next/navigation'
+import { useEffect, type ReactNode } from 'react'
 
 /**
  * Modal do perfil. É renderizado pela rota interceptada (@modal/(.)prestador/[id]),
  * então tem URL própria: dá para compartilhar, recarregar e voltar com o botão do navegador.
  */
-export function Modal({ children, label = "Perfil do prestador" }: { children: ReactNode; label?: string }) {
-  const router = useRouter();
+export function Modal({ children, label = 'Perfil do prestador' }: { children: ReactNode; label?: string }) {
+  const router = useRouter()
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && router.back();
-    document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && router.back()
+    document.addEventListener('keydown', onKey)
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
     return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
-    };
-  }, [router]);
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prev
+    }
+  }, [router])
 
   return (
     <div
@@ -41,5 +41,5 @@ export function Modal({ children, label = "Perfil do prestador" }: { children: R
         {children}
       </div>
     </div>
-  );
+  )
 }

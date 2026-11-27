@@ -1,4 +1,4 @@
-import { Modal } from "@/components/ui/modal";
+import { Modal } from '@/components/ui/modal'
 
 export default function Loading() {
   return (
@@ -10,5 +10,5 @@ export default function Loading() {
         <div className="skeleton h-4 w-2/5" />
       </div>
     </Modal>
-  );
+  )
 }
