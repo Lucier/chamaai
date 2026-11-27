@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chama Aí — Profissionais de confiança perto de você</title>
+<meta name="description" content="Encontre eletricistas, diaristas, encanadores e outros profissionais da sua cidade e fale direto pelo WhatsApp.">
+<meta name="theme-color" content="#0F6B73">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#F4F7F8; --card:#FFFFFF; --text:#10242B; --muted:#5B6B72;
+  --primary:#0F6B73; --primary-soft:#E6F1F2;
+  --accent:#E8772E; --success:#16A34A; --success-bg:#ECFDF3;
+  --error:#DC2626; --error-bg:#FEF2F2; --border:#E5E7EB;
+  --wa:#1FAF54; --star:#F5A524;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.55;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column}
+body.modal-open{overflow:hidden}
+a,button,input,select,textarea,.card,.tab,.chip,.thumb,.star-btn,.pcard{transition:background-color .2s ease,color .2s ease,border-color .2s ease,box-shadow .2s ease,filter .2s ease,opacity .2s ease,transform .2s ease}
+h1{font-size:24px;font-weight:700;line-height:1.25;letter-spacing:-.01em}
+h2{font-size:18px;font-weight:600;line-height:1.3}
+h3{font-size:16px;font-weight:600;line-height:1.3}
+label,.label{font-size:13px;font-weight:500;color:var(--text)}
+.muted{color:var(--muted)} .small{font-size:13px}
+.hidden{display:none!important}
+.wrap{max-width:1200px;margin:0 auto;padding:0 16px;width:100%}
+main.wrap{flex:1;padding-top:32px;padding-bottom:48px}
+.row{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.row.between{justify-content:space-between} .row.end{justify-content:flex-end}
+.stack{display:flex;flex-direction:column;gap:16px}
+.section{margin-top:32px}
+
+/* Cards */
+.card{background:var(--card);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.1);padding:24px}
+
+/* Botões */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:8px;padding:12px 24px;font:600 15px/1.2 'Inter',sans-serif;cursor:pointer;background:var(--primary);color:#fff;text-decoration:none;white-space:nowrap}
+.btn:hover:not(:disabled){filter:brightness(.9)}
+.btn:active:not(:disabled){transform:translateY(1px)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-accent{background:var(--accent)}
+.btn-wa{background:var(--wa)}
+.btn-success{background:var(--success)}
+.btn-danger{background:var(--error)}
+.btn-ghost{background:#fff;color:var(--primary);border:1px solid var(--border)}
+.btn-ghost:hover:not(:disabled){background:var(--primary-soft);filter:none;border-color:#C9DFE1}
+.btn-ghost-danger{background:#fff;color:var(--error);border:1px solid #F3C4C4}
+.btn-ghost-danger:hover:not(:disabled){background:var(--error-bg);filter:none}
+.btn-sm{padding:8px 14px;font-size:13px}
+.btn-block{width:100%}
+.btn svg{width:18px;height:18px;flex-shrink:0}
+.btn-sm svg{width:15px;height:15px}
+
+/* Formulários */
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+input,select,textarea{width:100%;font:400 15px/1.4 'Inter',sans-serif;color:var(--text);background:#fff;border:1px solid #E5E7EB;border-radius:8px;padding:12px 16px;outline:none;appearance:none;-webkit-appearance:none}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235B6B72' d='M6 8 0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px;cursor:pointer}
+textarea{resize:vertical;min-height:110px}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(15,107,115,.15)}
+input::placeholder,textarea::placeholder{color:#9AA6AB}
+.field.invalid input,.field.invalid select,.field.invalid textarea{border-color:var(--error);background:#FFFBFB}
+.err{display:none;color:var(--error);font-size:13px;font-weight:500}
+.field.invalid .err{display:block}
+.hint{font-size:13px;color:var(--muted)}
+.req{color:var(--error)}
+.check{display:flex;gap:10px;align-items:flex-start;cursor:pointer;font-size:14px}
+.check input{width:18px;height:18px;margin-top:2px;flex-shrink:0;appearance:auto;-webkit-appearance:auto;accent-color:var(--primary);cursor:pointer}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.span2{grid-column:1/-1}
+
+/* Topo e abas */
+.topbar{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.96);backdrop-filter:saturate(1.4) blur(8px);border-bottom:1px solid var(--border)}
+.topbar-in{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:66px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:19px;color:var(--text);text-decoration:none;letter-spacing:-.02em}
+.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--primary),#14919B);display:grid;place-items:center;color:#fff}
+.logo svg{width:20px;height:20px}
+.brand b{color:var(--accent)}
+.tabs{display:flex;gap:4px}
+.tab{position:relative;border:0;background:transparent;font:600 14px 'Inter',sans-serif;color:var(--muted);padding:10px 16px;border-radius:8px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.tab svg{width:17px;height:17px}
+.tab:hover{background:#F1F5F6;color:var(--text)}
+.tab.active{background:var(--primary-soft);color:var(--primary)}
+.badge{background:var(--accent);color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px;min-width:20px;text-align:center}
+
+.notice{padding:12px 16px;font-size:13px;text-align:center}
+.notice.demo{background:#FFF7ED;color:#9A3412;border-bottom:1px solid #FED7AA}
+.notice.bad{background:var(--error-bg);color:#991B1B;border-bottom:1px solid #FECACA}
+
+/* Busca */
+.hero{background:linear-gradient(135deg,#0F6B73 0%,#0C5960 60%,#0A4D53 100%);color:#fff;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-80px;top:-80px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.06)}
+.hero h1{color:#fff;max-width:640px}
+.hero p{color:#CFE5E7;margin-top:8px;max-width:620px}
+.hero label{color:#E3F0F1}
+.filters{display:grid;grid-template-columns:2fr 1.2fr 1fr 1fr 1fr;gap:16px;margin-top:24px;position:relative;z-index:1}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;margin-top:24px;scrollbar-width:thin}
+.chip{flex-shrink:0;border:1px solid var(--border);background:#fff;color:var(--text);border-radius:999px;padding:8px 14px;font:500 13px 'Inter',sans-serif;cursor:pointer;display:flex;gap:6px;align-items:center}
+.chip:hover{border-color:var(--primary);color:var(--primary)}
+.chip.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.chip .n{opacity:.7;font-size:12px}
+.results-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:24px 0 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+
+.pcard{padding:0;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;outline:none}
+.pcard:hover,.pcard:focus-visible{box-shadow:0 10px 28px rgba(16,36,43,.13);transform:translateY(-2px)}
+.cover{width:100%;aspect-ratio:16/10;object-fit:cover;display:block;background:#E8EEF0}
+.ph{display:flex;align-items:center;justify-content:center;font-size:46px;position:relative}
+.ph .ini{position:absolute;right:12px;bottom:10px;font-size:13px;font-weight:700;color:rgba(16,36,43,.45)}
+.pbody{padding:20px 24px 24px;display:flex;flex-direction:column;gap:8px;flex:1}
+.tag{align-self:flex-start;background:var(--primary-soft);color:var(--primary);font-size:12px;font-weight:600;border-radius:999px;padding:4px 10px}
+.pname{font-size:17px}
+.loc{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:13px}
+.loc svg{width:14px;height:14px;flex-shrink:0}
+.pfoot{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-top:auto;padding-top:12px;border-top:1px solid #F0F2F3}
+.price{line-height:1.25}
+.price small{display:block;font-size:12px;color:var(--muted)}
+.price strong{font-size:18px;color:var(--text)}
+.price .unit{display:block;font-size:12px;color:var(--muted);font-weight:500}
+.rating{display:flex;align-items:center;gap:6px;font-size:13px;min-height:20px}
+.stars{position:relative;display:inline-block;color:#D9DEE1;letter-spacing:1px;font-size:15px;line-height:1}
+.stars::before{content:"★★★★★";position:absolute;left:0;top:0;width:var(--w,0%);overflow:hidden;color:var(--star);white-space:nowrap}
+.new-pill{font-size:12px;font-weight:600;color:var(--accent);background:#FDF0E6;border-radius:999px;padding:2px 8px}
+
+.skel{background:linear-gradient(90deg,#EEF1F2 25%,#F6F8F9 37%,#EEF1F2 63%);background-size:400% 100%;animation:sh 1.3s ease infinite;border-radius:8px}
+@keyframes sh{0%{background-position:100% 50%}100%{background-position:0 50%}}
+.empty{text-align:center;padding:48px 24px}
+.empty .big{font-size:42px;margin-bottom:8px}
+.empty p{max-width:420px;margin:8px auto 16px}
+
+/* Cadastro */
+.reg-layout{display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start}
+.steps{list-style:none;display:flex;flex-direction:column;gap:16px;margin-top:16px}
+.steps li{display:flex;gap:12px}
+.steps .num{width:28px;height:28px;border-radius:50%;background:var(--primary-soft);color:var(--primary);font-weight:700;font-size:13px;display:grid;place-items:center;flex-shrink:0}
+.photo-drop{border:1.5px dashed #C9D3D6;border-radius:12px;padding:20px;text-align:center;cursor:pointer;background:#FAFBFC;display:block}
+.photo-drop:hover{border-color:var(--primary);background:var(--primary-soft)}
+.photo-drop input{display:none}
+.previews{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.prev{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#EEF1F2}
+.prev img{width:100%;height:100%;object-fit:cover}
+.prev button{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(16,36,43,.75);color:#fff;cursor:pointer;font-size:15px;line-height:1}
+.prev button:hover{background:var(--error)}
+.prev .first{position:absolute;left:6px;bottom:6px;background:rgba(255,255,255,.92);font-size:11px;font-weight:600;padding:2px 6px;border-radius:6px}
+.success-card{background:var(--success-bg);border:1px solid #BBF7D0;text-align:center}
+.success-card .ok-ic{width:56px;height:56px;border-radius:50%;background:var(--success);color:#fff;display:grid;place-items:center;margin:0 auto 12px}
+.success-card .ok-ic svg{width:28px;height:28px}
+.counter{font-size:12px;color:var(--muted);text-align:right}
+
+/* Modal / perfil */
+.modal{position:fixed;inset:0;z-index:60;background:rgba(10,30,35,.55);display:flex;align-items:flex-start;justify-content:center;padding:32px 16px;overflow-y:auto;animation:fade .2s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.modal-box{background:var(--card);border-radius:12px;width:100%;max-width:820px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:up .25s ease}
+@keyframes up{from{transform:translateY(12px);opacity:.6}to{transform:none;opacity:1}}
+.modal-box.sm{max-width:420px;padding:24px;margin-top:12vh}
+.modal-close{position:absolute;top:12px;right:12px;z-index:3;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.95);box-shadow:0 1px 4px rgba(0,0,0,.18);cursor:pointer;font-size:22px;line-height:1;color:var(--text)}
+.modal-close:hover{background:#fff;filter:brightness(.92)}
+.gallery-main{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;border-radius:12px 12px 0 0;background:#E8EEF0}
+.gallery-main.ph{display:flex;font-size:72px;aspect-ratio:16/6}
+.dist{display:grid;grid-template-columns:auto 1fr auto;gap:4px 8px;align-items:center;font-size:12px;color:var(--muted);flex:1;max-width:260px;margin-left:auto}
+.dist .bar{height:6px;border-radius:99px;background:#EEF1F2;overflow:hidden}
+.dist .bar i{display:block;height:100%;background:var(--star);border-radius:99px}
+.kv a{color:var(--primary);font-weight:600}
+.thumbs{display:flex;gap:8px;padding:12px 24px 0}
+.thumb{width:64px;height:48px;border-radius:8px;object-fit:cover;cursor:pointer;border:2px solid transparent;opacity:.75}
+.thumb.on,.thumb:hover{border-color:var(--primary);opacity:1}
+.pf-body{padding:24px}
+.pf-head{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.pf-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+.desc{white-space:pre-line}
+.inner{background:#F8FAFB;border:1px solid var(--border);border-radius:12px;padding:24px}
+.star-input{display:flex;gap:4px}
+.star-btn{border:0;background:none;font-size:30px;line-height:1;color:#D9DEE1;cursor:pointer;padding:2px}
+.star-btn.on{color:var(--star)}
+.star-btn:hover{transform:scale(1.12)}
+.rv{padding:16px 0;border-top:1px solid #EEF1F2}
+.rv:first-child{border-top:0;padding-top:0}
+.rv-head{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.summary{display:flex;align-items:center;gap:16px;margin:12px 0 16px}
+.summary .big{font-size:36px;font-weight:700;line-height:1}
+.status-pill{display:inline-block;font-size:12px;font-weight:600;border-radius:999px;padding:3px 10px}
+.st-pending{background:#FEF3C7;color:#92400E}
+.st-approved{background:var(--success-bg);color:#166534}
+.st-paused{background:#E5E7EB;color:#374151}
+.st-rejected{background:var(--error-bg);color:#991B1B}
+.inline-ok{background:var(--success-bg);border:1px solid #BBF7D0;color:#166534;border-radius:8px;padding:12px 16px;font-size:14px;font-weight:500}
+
+/* Admin */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.stat .v{font-size:28px;font-weight:700;line-height:1.1;margin-top:4px}
+.stat .l{font-size:13px;color:var(--muted);font-weight:500}
+.seg{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.table-wrap{overflow-x:auto;margin:0 -24px -24px;border-top:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:#F3F4F6;text-align:left;font-size:13px;font-weight:600;color:#374151;padding:12px 16px;white-space:nowrap}
+td{padding:12px 16px;border-top:1px solid var(--border);vertical-align:top}
+tr:hover td{background:#FAFBFC}
+td .acts{display:flex;gap:8px;flex-wrap:wrap}
+.pend{display:grid;grid-template-columns:180px 1fr;gap:24px}
+.pend-photos{display:grid;grid-template-columns:1fr 1fr;gap:6px;align-content:start}
+.pend-photos img,.pend-photos .ph{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;font-size:28px}
+.pend-photos .solo{grid-column:1/-1}
+.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin:12px 0}
+.kv div span{display:block;font-size:12px;color:var(--muted);font-weight:500}
+.login-box{max-width:420px;margin:24px auto 0}
+
+/* Toast */
+#toasts{position:fixed;bottom:20px;right:20px;left:20px;z-index:90;display:flex;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none}
+.toast{pointer-events:auto;background:var(--text);color:#fff;padding:12px 18px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.2);font-size:14px;font-weight:500;max-width:420px;animation:up .25s ease}
+.toast.success{background:var(--success)} .toast.error{background:var(--error)}
+
+footer{border-top:1px solid var(--border);background:#fff;padding:24px 0;font-size:13px;color:var(--muted)}
+footer a{color:var(--primary);font-weight:600;text-decoration:none;cursor:pointer}
+
+/* Responsivo */
+@media (max-width:1000px){
+  .filters{grid-template-columns:1fr 1fr}
+  .filters .grow{grid-column:1/-1}
+  .reg-layout{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:768px){
+  main.wrap{padding-top:24px}
+  .topbar-in{flex-direction:column;align-items:stretch;gap:8px;padding:10px 0 8px}
+  .brand{justify-content:center}
+  .tabs{overflow-x:auto;justify-content:space-between}
+  .tab{padding:9px 10px;font-size:13px;flex:1;justify-content:center}
+  .filters,.form-grid,.grid{grid-template-columns:1fr}
+  .card{padding:20px}
+  .pend{grid-template-columns:1fr}
+  .pend-photos{grid-template-columns:repeat(4,1fr)}
+  .pend-photos .solo{grid-column:auto}
+  .modal{padding:0}
+  .modal-box{border-radius:0;min-height:100%}
+  .modal-box.sm{border-radius:12px;min-height:0;margin:20vh 16px 0}
+  .gallery-main{border-radius:0}
+  .pf-actions .btn{flex:1}
+  .pf-head .price{text-align:left!important}
+  .dist{max-width:none;margin-left:0;flex-basis:100%}
+  .summary{flex-wrap:wrap}
+  .table-wrap{margin:0 -20px -20px}
+  .results-head{flex-wrap:wrap}
+  .previews{grid-template-columns:repeat(2,1fr)}
+}
+
+/* Impressão / PDF */
+@media print{
+  .topbar,.tabs,.notice,button,.btn,.no-print,#toasts,footer,.chips,.seg,.modal-close{display:none!important}
+  body,html{background:#fff!important;color:#000!important}
+  *{color:#000!important;box-shadow:none!important}
+  .card,.inner{border:1px solid #ccc;background:#fff!important}
+  .hero{background:#fff!important}
+  main.wrap{padding:0}
+  body.modal-open main,body.modal-open footer{display:none!important}
+  .modal{position:static;background:none;padding:0;overflow:visible}
+  .modal-box{box-shadow:none;max-width:none}
+  .table-wrap{overflow:visible;margin:0}
+  th{background:#F3F4F6!important}
+  .stars::before{color:#000!important}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="#" data-action="go-home" aria-label="Chama Aí — início">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
+      <span>Chama <b>Aí</b></span>
+    </a>
+    <nav class="tabs" role="tablist" aria-label="Seções">
+      <button class="tab active" data-tab="search" role="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Encontrar serviço</button>
+      <button class="tab" data-tab="register" role="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>Sou prestador</button>
+      <button class="tab" data-tab="admin" role="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Admin <span id="pendingBadge" class="badge hidden"></span></button>
+    </nav>
+  </div>
+</header>
+<div id="notice" class="notice hidden"></div>
+
+<main class="wrap">
+
+  <!-- ============ ABA 1: ENCONTRAR SERVIÇO ============ -->
+  <section id="view-search" class="view" aria-labelledby="t-search">
+    <div class="card hero">
+      <h1 id="t-search">Encontre um profissional de confiança perto de você</h1>
+      <p>Eletricistas, diaristas, encanadores e muito mais. Veja avaliações, compare preços e fale direto pelo WhatsApp.</p>
+      <div class="filters">
+        <div class="field grow"><label for="fQ">O que você precisa?</label><input id="fQ" type="search" placeholder="Ex: trocar chuveiro, faxina, conserto de ar…" autocomplete="off"></div>
+        <div class="field"><label for="fCat">Categoria</label><select id="fCat"></select></div>
+        <div class="field"><label for="fCity">Cidade</label><select id="fCity"></select></div>
+        <div class="field"><label for="fHood">Bairro</label><select id="fHood"></select></div>
+        <div class="field"><label for="fSort">Ordenar por</label>
+          <select id="fSort"><option value="rating">Melhor avaliados</option><option value="price">Menor preço</option><option value="recent">Mais recentes</option></select></div>
+      </div>
+    </div>
+    <div id="chips" class="chips" aria-label="Categorias"></div>
+    <div class="results-head">
+      <h2 id="resultsTitle" aria-live="polite">Carregando profissionais…</h2>
+      <button class="btn btn-ghost btn-sm hidden" id="btnClear" data-action="clear-filters">Limpar filtros</button>
+    </div>
+    <div id="results" class="grid"></div>
+  </section>
+
+  <!-- ============ ABA 2: SOU PRESTADOR ============ -->
+  <section id="view-register" class="view hidden" aria-labelledby="t-reg">
+    <div class="reg-layout">
+      <div>
+        <div id="regSuccess" class="card success-card hidden">
+          <div class="ok-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+          <h1>Cadastro recebido!</h1>
+          <p class="muted" style="margin:8px auto 24px;max-width:440px">Agora nossa equipe vai conferir suas informações. Assim que for aprovado, seu perfil aparece para os clientes da sua cidade.</p>
+          <div class="row" style="justify-content:center">
+            <button class="btn btn-ghost" data-action="reg-again">Cadastrar outro profissional</button>
+            <button class="btn" data-tab="search">Ver o catálogo</button>
+          </div>
+        </div>
+
+        <form id="regForm" class="card" novalidate>
+          <h1 id="t-reg">Divulgue seu serviço grátis</h1>
+          <p class="muted" style="margin-top:6px">Preencha seus dados. Os campos com <span class="req">*</span> são obrigatórios.</p>
+
+          <div class="form-grid" style="margin-top:24px">
+            <div class="field span2"><label for="rName">Nome completo ou nome do negócio <span class="req">*</span></label>
+              <input id="rName" name="name" maxlength="80" placeholder="Ex: João Silva Elétrica" autocomplete="name"><div class="err"></div></div>
+            <div class="field"><label for="rWa">WhatsApp com DDD <span class="req">*</span></label>
+              <input id="rWa" name="whatsapp" inputmode="tel" placeholder="(89) 99999-9999" autocomplete="tel"><div class="err"></div></div>
+            <div class="field"><label for="rCat">Categoria <span class="req">*</span></label>
+              <select id="rCat" name="category"></select><div class="err"></div></div>
+            <div class="field"><label for="rCity">Cidade <span class="req">*</span></label>
+              <input id="rCity" name="city" maxlength="60" list="dlCity" placeholder="Ex: Uruçuí - PI"><datalist id="dlCity"></datalist><div class="err"></div></div>
+            <div class="field"><label for="rHood">Bairro onde atende <span class="req">*</span></label>
+              <input id="rHood" name="neighborhood" maxlength="60" list="dlHood" placeholder="Ex: Centro"><datalist id="dlHood"></datalist><div class="err"></div></div>
+            <div class="field"><label for="rUnit">Como você cobra? <span class="req">*</span></label>
+              <select id="rUnit" name="price_unit"></select><div class="err"></div></div>
+            <div class="field"><label for="rPrice">Preço inicial (R$) <span class="req">*</span></label>
+              <input id="rPrice" name="price" inputmode="decimal" placeholder="Ex: 80"><div class="err"></div></div>
+            <div class="field span2"><label for="rDesc">Descreva seu serviço <span class="req">*</span></label>
+              <textarea id="rDesc" name="description" maxlength="1000" placeholder="O que você faz, há quanto tempo trabalha, dias e horários de atendimento, se atende emergência…"></textarea>
+              <div class="row between"><div class="err"></div><div class="counter" id="descCount">0/1000</div></div></div>
+
+            <div class="field span2">
+              <span class="label">Fotos do seu trabalho <span class="muted">(até 4, a primeira vira a capa)</span></span>
+              <label class="photo-drop" id="photoDrop">
+                <input type="file" id="rPhotos" accept="image/*" multiple>
+                <strong style="color:var(--primary)">📷 Toque para escolher fotos</strong>
+                <div class="hint" style="margin-top:4px">As fotos são reduzidas automaticamente para o app carregar rápido.</div>
+              </label>
+              <div class="previews" id="previews"></div>
+            </div>
+
+            <div class="field span2">
+              <label class="check"><input type="checkbox" name="terms" id="rTerms"> <span>Confirmo que as informações são verdadeiras e autorizo que meu nome, WhatsApp e fotos apareçam no Chama Aí. <span class="req">*</span></span></label>
+              <div class="err"></div>
+            </div>
+          </div>
+          <button class="btn btn-accent btn-block" type="submit" id="regBtn" style="margin-top:24px">Enviar cadastro para aprovação</button>
+        </form>
+      </div>
+
+      <aside class="card">
+        <h2>Como funciona</h2>
+        <ol class="steps">
+          <li><span class="num">1</span><div><strong>Você se cadastra</strong><div class="muted small">Leva uns 3 minutos e é grátis.</div></div></li>
+          <li><span class="num">2</span><div><strong>A gente confere</strong><div class="muted small">Cada cadastro é verificado antes de aparecer, pra deixar o catálogo confiável.</div></div></li>
+          <li><span class="num">3</span><div><strong>Clientes te chamam</strong><div class="muted small">Eles falam com você direto pelo WhatsApp e pedem orçamento.</div></div></li>
+          <li><span class="num">4</span><div><strong>Boas avaliações te destacam</strong><div class="muted small">Os mais bem avaliados aparecem primeiro na busca.</div></div></li>
+        </ol>
+        <div class="inner" style="margin-top:24px;padding:16px">
+          <strong class="small">💡 Dica</strong>
+          <p class="small muted" style="margin-top:4px">Perfis com fotos reais do seu trabalho recebem muito mais contatos.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ ABA 3: ADMIN ============ -->
+  <section id="view-admin" class="view hidden" aria-label="Administração">
+    <div id="adminRoot"></div>
+  </section>
+</main>
+
+<footer class="no-print">
+  <div class="wrap row between">
+    <span>© <span id="year"></span> Chama Aí · Profissionais de confiança da sua cidade</span>
+    <span>É prestador? <a data-tab="register">Cadastre-se grátis</a></span>
+  </div>
+</footer>
+
+<!-- Perfil -->
+<div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Perfil do prestador">
+  <div class="modal-box"><button class="modal-close" data-action="close-modal" aria-label="Fechar">×</button><div id="modalBody"></div></div>
+</div>
+<!-- Confirmação -->
+<div id="confirm" class="modal hidden" role="alertdialog" aria-modal="true" aria-labelledby="cfTitle">
+  <div class="modal-box sm">
+    <h2 id="cfTitle"></h2><p id="cfMsg" class="muted" style="margin:8px 0 24px"></p>
+    <div class="row end"><button class="btn btn-ghost" id="cfNo">Cancelar</button><button class="btn btn-danger" id="cfYes">Confirmar</button></div>
+  </div>
+</div>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+'use strict';
+/* =====================================================================
+   CONFIGURAÇÃO — cole aqui as duas chaves do seu projeto Supabase.
+   Enquanto estiverem vazias, o app roda em MODO DEMONSTRAÇÃO
+   (dados de exemplo salvos só neste navegador).
+   ===================================================================== */
+const CONFIG = {
+  SUPABASE_URL: '',       // ex: 'https://abcdefgh.supabase.co'
+  SUPABASE_ANON_KEY: '',  // a chave "anon" / "publishable" (pode ficar pública)
+  DEMO_ADMIN_PASSWORD: 'admin123' // só vale no modo demonstração
+};
+
+/* ---------------- Constantes ---------------- */
+const CATEGORIES = [
+  ['Eletricista','⚡'],['Encanador','🔧'],['Diarista','🧹'],['Pedreiro','🧱'],['Pintor','🎨'],
+  ['Marceneiro','🪚'],['Jardineiro','🌿'],['Técnico de ar-condicionado','❄️'],['Montador de móveis','🛠️'],
+  ['Mecânico','🚗'],['Manicure e pedicure','💅'],['Cabeleireiro(a)','✂️'],['Fretes e mudanças','🚚'],
+  ['Técnico de informática','💻'],['Cuidador(a) de idosos','🤝'],['Babá','🧸'],['Outros','⭐']
+];
+const CAT_ICON = Object.fromEntries(CATEGORIES);
+const PRICE_UNITS = ['por serviço','por hora','por diária','por m²','a combinar'];
+const PH_COLORS = ['#DCEFF0','#FDEBDD','#E5EEFB','#E8F5E9','#F3E8FD','#FFF4D6','#FDE7EC','#E6F4F1'];
+const WHEN_OPTS = ['O quanto antes','Esta semana','Este mês','Só estou pesquisando preço'];
+
+const LIVE = Boolean(CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY);
+let sb = null;
+try { if (LIVE && window.supabase) sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); }
+catch (e) { console.error('Supabase:', e); }
+
+/* ---------------- Estado ---------------- */
+const S = {
+  loaded:false, loadError:null, isAdmin:false,
+  providers:[], reviews:[], adminProviders:[], quotes:[],
+  f:{ q:'', cat:'', city:'', hood:'', sort:'rating' },
+  adminTab:'pending', tab:'search',
+  open:null, regPhotos:[], busy:false
+};
+
+/* ---------------- Utilidades ---------------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+const clone = o => JSON.parse(JSON.stringify(o));
+const BRL = new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL', minimumFractionDigits:0, maximumFractionDigits:2 });
+const fmtDate = iso => { try { return new Date(iso).toLocaleDateString('pt-BR'); } catch { return ''; } };
+function uid(){
+  try { if (crypto && crypto.randomUUID) return crypto.randomUUID(); } catch {}
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random()*16|0; return (c === 'x' ? r : (r&3|8)).toString(16); });
+}
+function deviceId(){
+  try { let d = localStorage.getItem('chamaai_device'); if (!d) { d = uid(); localStorage.setItem('chamaai_device', d); } return d; }
+  catch { return (window.__dev = window.__dev || uid()); }
+}
+function safeImg(u){
+  return (typeof u === 'string' && (/^https:\/\//i.test(u) || /^data:image\/(jpeg|png|webp);base64,/i.test(u))) ? u : '';
+}
+function hashColor(s){ let h = 0; for (const c of String(s)) h = (h*31 + c.charCodeAt(0)) >>> 0; return PH_COLORS[h % PH_COLORS.length]; }
+function initials(n){ return String(n).trim().split(/\s+/).filter(Boolean).slice(0,2).map(w => w[0]).join('').toUpperCase(); }
+function catIcon(c){ return CAT_ICON[c] || '⭐'; }
+function maskPhone(v){
+  const d = String(v).replace(/\D/g, '').slice(0, 11);
+  if (!d.length) return '';
+  if (d.length <= 2) return `(${d}`;
+  if (d.length <= 6) return `(${d.slice(0,2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
+  return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+}
+function normalizePhone(v){
+  let d = String(v).replace(/\D/g, '').replace(/^0+/, '');
+  if (d.length === 10 || d.length === 11) d = '55' + d;
+  return /^55\d{10,11}$/.test(d) ? d : null;
+}
+const fmtPhone = d => maskPhone(String(d || '').replace(/^55/, ''));
+function parsePrice(v){
+  let s = String(v).replace(/[R$\s]/gi, '');
+  if (!s) return null;
+  if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+  const n = Number(s);
+  return Number.isFinite(n) ? Math.round(n*100)/100 : null;
+}
+function waLink(p, text){
+  const msg = text || `Olá, ${p.name}! Encontrei seu perfil no Chama Aí e gostaria de mais informações sobre o serviço de ${p.category}.`;
+  return `https://wa.me/${String(p.whatsapp).replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`;
+}
+function friendlyError(e){
+  const m = (e && (e.message || e.error_description)) || String(e);
+  if (e && e.code === '23505') return 'Você já avaliou este prestador neste aparelho.';
+  if (/Failed to fetch|NetworkError|Load failed|network/i.test(m)) return 'Sem conexão com a internet. Confira e tente de novo.';
+  if (/Invalid login credentials/i.test(m)) return 'E-mail ou senha incorretos.';
+  if (/Email not confirmed/i.test(m)) return 'Esse e-mail ainda não foi confirmado no Supabase.';
+  if (/row-level security|permission denied|violates/i.test(m)) return 'Ação não permitida. Confira se o script do banco foi executado.';
+  if (/mime|size|too large|exceeded/i.test(m)) return 'Foto muito grande ou em formato não aceito.';
+  return m;
+}
+function toast(msg, type = 'info'){
+  const t = document.createElement('div');
+  t.className = 'toast ' + type; t.textContent = msg;
+  $('#toasts').appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 250); }, type === 'error' ? 5000 : 3200);
+}
+function setErr(el, msg){
+  const f = el.closest('.field'); if (!f) return;
+  f.classList.toggle('invalid', !!msg);
+  const e = f.querySelector('.err'); if (e) e.textContent = msg || '';
+}
+function clearErrs(form){ $$('.field.invalid', form).forEach(f => f.classList.remove('invalid')); }
+function blobToDataURL(b){ return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(b); }); }
+function compressImage(file, maxSide, quality){
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file); const img = new Image();
+    img.onload = () => {
+      let w = img.naturalWidth, h = img.naturalHeight; const s = Math.min(1, maxSide / Math.max(w, h));
+      w = Math.round(w*s); h = Math.round(h*s);
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h); ctx.drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      c.toBlob(b => b ? res(b) : rej(new Error('Não foi possível processar a foto.')), 'image/jpeg', quality);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('Arquivo de imagem inválido.')); };
+    img.src = url;
+  });
+}
+
+/* ---------------- Dados de demonstração ---------------- */
+function seed(){
+  const now = Date.now(), d = n => new Date(now - n*86400000).toISOString();
+  const C = 'Uruçuí - PI';
+  const P = (id, name, wa, category, city, hood, price, unit, desc, status, days) =>
+    ({ id, created_at:d(days), name, whatsapp:wa, category, city, neighborhood:hood, price, price_unit:unit, description:desc, photos:[], status });
+  const providers = [
+    P('demo-1','João Batista Silva','5589999990001','Eletricista',C,'Centro',80,'por serviço','Instalações e reparos elétricos residenciais e comerciais. Troca de disjuntores, tomadas, chuveiros e quadros de energia. Instalo ventilador de teto e iluminação.\nAtendo de segunda a sábado e também emergências.','approved',40),
+    P('demo-2','Maria das Graças Sousa','5589999990002','Diarista',C,'Bairro Novo',150,'por diária','Faxina completa em casas e apartamentos, limpeza pós-obra e passadoria. Mais de 10 anos de experiência, com referências.','approved',35),
+    P('demo-3','Antônio Pereira','5589999990003','Encanador',C,'Vila Operária',70,'por serviço','Conserto de vazamentos, desentupimento, instalação de caixa d\'água, torneiras, descargas e bombas.','approved',30),
+    P('demo-4','Francisca Lima','5589999990004','Manicure e pedicure',C,'Centro',35,'por serviço','Atendimento a domicílio ou no meu espaço. Unhas em gel, fibra, esmaltação e spa dos pés. Material esterilizado.','approved',22),
+    P('demo-5','Raimundo Costa','5589999990005','Pedreiro',C,'Aeroporto',180,'por diária','Construção, reforma, reboco, contrapiso, assentamento de cerâmica e porcelanato. Faço orçamento sem compromisso.','approved',18),
+    P('demo-6','Carlos Eduardo Ramos','5589999990006','Técnico de ar-condicionado',C,'Santa Luzia',180,'por serviço','Instalação, limpeza e manutenção de ar-condicionado split e janela. Carga de gás e conserto. Garantia de 90 dias.','approved',12),
+    P('demo-7','Ana Paula Martins','5589999990007','Cabeleireiro(a)',C,'Bairro Novo',50,'por serviço','Cortes femininos e masculinos, escova, progressiva, coloração e penteados para festas.','approved',8),
+    P('demo-8','Pedro Henrique Alves','5589999990008','Fretes e mudanças','Ribeiro Gonçalves - PI','Centro',0,'a combinar','Fretes e mudanças locais e para cidades da região com caminhão baú. Ajudantes disponíveis.','approved',5),
+    P('demo-9','Luciana Rocha','5589999990009','Cuidador(a) de idosos',C,'Centro',120,'por diária','Técnica de enfermagem. Acompanhamento de idosos em casa e no hospital, dia ou noite.','approved',3),
+    P('demo-10','José Ribamar Nunes','5589999990010','Pintor',C,'Vila Operária',25,'por m²','Pintura residencial e comercial, textura, grafiato e massa corrida.','pending',1),
+    P('demo-11','Daniel Souza','5589999990011','Técnico de informática',C,'Centro',60,'por hora','Formatação, remoção de vírus, montagem de computadores e instalação de redes Wi-Fi.','pending',0)
+  ];
+  const R = (id, pid, author, stars, comment, days) => ({ id, provider_id:pid, author, stars, comment, created_at:d(days), device_id:'seed-'+id });
+  const reviews = [
+    R('r1','demo-1','Cláudia M.',5,'Chegou no horário e resolveu o problema do chuveiro rapidinho. Recomendo!',20),
+    R('r2','demo-1','Marcos',5,'Muito caprichoso e preço justo.',15),
+    R('r3','demo-1','Rita',4,'Bom serviço, só demorou um pouco pra responder.',6),
+    R('r4','demo-2','Fernanda S.',5,'Deixou a casa brilhando. Já chamei de novo.',25),
+    R('r5','demo-2','Jéssica',5,'Pessoa de confiança, super organizada.',10),
+    R('r6','demo-3','Paulo R.',4,'Resolveu o vazamento. Preço ok.',12),
+    R('r7','demo-4','Bianca',5,'Amei as unhas! Muito cuidadosa.',9),
+    R('r8','demo-4','Lara',4,'',4),
+    R('r9','demo-5','Edson',5,'Trabalho limpo e entregou no prazo combinado.',7),
+    R('r10','demo-6','Rafael',5,'Instalou dois splits, tudo certinho. Profissional nota 10.',5),
+    R('r11','demo-6','Sônia',4,'Atencioso, explicou tudo.',2),
+    R('r12','demo-7','Gabriela',5,'Melhor progressiva que já fiz.',3)
+  ];
+  return { providers, reviews, quotes:[] };
+}
+const DemoDB = (() => {
+  const KEY = 'chamaai_demo_v1'; let mem = null;
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(mem)); return true; } catch (e) { console.warn(e); return false; } }
+  function load(){
+    if (mem) return mem;
+    try { const raw = localStorage.getItem(KEY); if (raw) { mem = JSON.parse(raw); if (mem && mem.providers) return mem; } } catch (e) { console.warn(e); }
+    mem = seed(); save(); return mem;
+  }
+  return { get db(){ return load(); }, save, reset(){ mem = seed(); save(); } };
+})();
+
+/* ---------------- Camada de dados (demo ou Supabase) ---------------- */
+const api = {
+  c(){ if (!sb) throw new Error('Não foi possível conectar ao servidor. Verifique a internet e recarregue a página.'); return sb; },
+  ok({ data, error }){ if (error) throw error; return data; },
+
+  async publicProviders(){
+    if (!LIVE) return DemoDB.db.providers.filter(p => p.status === 'approved').map(clone);
+    return this.ok(await this.c().from('providers').select('*').eq('status','approved')) || [];
+  },
+  async allProviders(){
+    if (!LIVE) return DemoDB.db.providers.map(clone).sort((a,b) => b.created_at.localeCompare(a.created_at));
+    return this.ok(await this.c().from('providers').select('*').order('created_at', { ascending:false })) || [];
+  },
+  async reviews(){
+    if (!LIVE) {
+      const ok = new Set(DemoDB.db.providers.filter(p => S.isAdmin || p.status === 'approved').map(p => p.id));
+      return DemoDB.db.reviews.filter(r => ok.has(r.provider_id)).map(clone).sort((a,b) => b.created_at.localeCompare(a.created_at));
+    }
+    return this.ok(await this.c().from('reviews').select('id,provider_id,author,stars,comment,created_at').order('created_at', { ascending:false })) || [];
+  },
+  async createProvider(p, blobs){
+    const id = uid();
+    if (!LIVE) {
+      const photos = []; for (const b of blobs) photos.push(await blobToDataURL(b));
+      const db = DemoDB.db;
+      db.providers.push({ ...p, id, photos, status:'pending', created_at:new Date().toISOString() });
+      if (!DemoDB.save()) { db.providers.pop(); throw new Error('O espaço do navegador encheu (modo demonstração). Tente com menos fotos.'); }
+      return;
+    }
+    const c = this.c(), urls = [];
+    for (let i = 0; i < blobs.length; i++) {
+      const path = `prestadores/${id}/${i+1}-${Date.now()}.jpg`;
+      this.ok(await c.storage.from('fotos').upload(path, blobs[i], { contentType:'image/jpeg', upsert:false }));
+      urls.push(c.storage.from('fotos').getPublicUrl(path).data.publicUrl);
+    }
+    this.ok(await c.from('providers').insert({ ...p, id, photos:urls, status:'pending' }));
+  },
+  async setStatus(id, status){
+    if (!LIVE) { const p = DemoDB.db.providers.find(x => x.id === id); if (p) { p.status = status; DemoDB.save(); } return; }
+    this.ok(await this.c().from('providers').update({ status }).eq('id', id));
+  },
+  async deleteProvider(id){
+    if (!LIVE) {
+      const db = DemoDB.db;
+      db.providers = db.providers.filter(p => p.id !== id);
+      db.reviews = db.reviews.filter(r => r.provider_id !== id);
+      db.quotes = db.quotes.filter(q => q.provider_id !== id);
+      DemoDB.save(); return;
+    }
+    const c = this.c();
+    const p = S.adminProviders.find(x => x.id === id);
+    this.ok(await c.from('providers').delete().eq('id', id));
+    const paths = ((p && p.photos) || []).map(u => { const i = u.indexOf('/object/public/fotos/'); return i > -1 ? decodeURIComponent(u.slice(i + 21)) : null; }).filter(Boolean);
+    if (paths.length) { try { await c.storage.from('fotos').remove(paths); } catch (e) { console.warn('Fotos não removidas:', e); } }
+  },
+  async createReview(r){
+    const row = { ...r, device_id:deviceId() };
+    if (!LIVE) {
+      const db = DemoDB.db;
+      if (db.reviews.some(x => x.provider_id === r.provider_id && x.device_id === row.device_id)) { const e = new Error('dup'); e.code = '23505'; throw e; }
+      db.reviews.push({ ...row, id:uid(), created_at:new Date().toISOString() }); DemoDB.save(); return;
+    }
+    this.ok(await this.c().from('reviews').insert(row));
+  },
+  async deleteReview(id){
+    if (!LIVE) { const db = DemoDB.db; db.reviews = db.reviews.filter(r => r.id !== id); DemoDB.save(); return; }
+    this.ok(await this.c().from('reviews').delete().eq('id', id));
+  },
+  async createQuote(q){
+    if (!LIVE) { DemoDB.db.quotes.push({ ...q, id:uid(), created_at:new Date().toISOString() }); DemoDB.save(); return; }
+    this.ok(await this.c().from('quotes').insert(q));
+  },
+  async quotes(){
+    if (!LIVE) return DemoDB.db.quotes.map(clone).sort((a,b) => b.created_at.localeCompare(a.created_at));
+    return this.ok(await this.c().from('quotes').select('*').order('created_at', { ascending:false })) || [];
+  },
+  async deleteQuote(id){
+    if (!LIVE) { const db = DemoDB.db; db.quotes = db.quotes.filter(q => q.id !== id); DemoDB.save(); return; }
+    this.ok(await this.c().from('quotes').delete().eq('id', id));
+  },
+  async session(){
+    if (!LIVE) { try { return sessionStorage.getItem('chamaai_admin') === '1'; } catch { return false; } }
+    if (!sb) return false;
+    const { data } = await sb.auth.getSession();
+    if (!data || !data.session) return false;
+    const r = await sb.rpc('is_admin'); return !r.error && r.data === true;
+  },
+  async login(email, pass){
+    if (!LIVE) {
+      if (pass !== CONFIG.DEMO_ADMIN_PASSWORD) throw new Error('Senha incorreta. No modo demonstração a senha é ' + CONFIG.DEMO_ADMIN_PASSWORD + '.');
+      try { sessionStorage.setItem('chamaai_admin', '1'); } catch {}
+      return;
+    }
+    const c = this.c();
+    this.ok(await c.auth.signInWithPassword({ email, password:pass }));
+    const r = await c.rpc('is_admin');
+    if (r.error || r.data !== true) { await c.auth.signOut(); throw new Error('Este usuário não tem permissão de administrador.'); }
+  },
+  async logout(){
+    if (!LIVE) { try { sessionStorage.removeItem('chamaai_admin'); } catch {} return; }
+    if (sb) await sb.auth.signOut();
+  }
+};
+
+/* ---------------- Carregamento ---------------- */
+async function loadAll(){
+  try {
+    const [prov, revs] = await Promise.all([api.publicProviders(), api.reviews()]);
+    S.providers = prov; S.reviews = revs;
+    if (S.isAdmin) {
+      const [all, q] = await Promise.all([api.allProviders(), api.quotes()]);
+      S.adminProviders = all; S.quotes = q;
+    }
+    S.loadError = null;
+  } catch (e) { console.error(e); S.loadError = friendlyError(e); }
+  S.loaded = true;
+  renderAll();
+}
+function ratings(){
+  const m = {};
+  for (const r of S.reviews) { const o = m[r.provider_id] || (m[r.provider_id] = { sum:0, n:0 }); o.sum += Number(r.stars) || 0; o.n++; }
+  for (const k in m) m[k].avg = m[k].sum / m[k].n;
+  return m;
+}
+const findProvider = id => S.providers.find(p => p.id === id) || S.adminProviders.find(p => p.id === id);
+
+/* ---------------- Pedaços visuais ---------------- */
+const IC = {
+  pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
+  wa:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.25-.46-2.38-1.47-.88-.79-1.47-1.76-1.65-2.05-.17-.3-.02-.46.13-.6.13-.14.3-.35.44-.52.15-.18.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.6-.92-2.2-.24-.58-.48-.5-.67-.5h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.7.63.71.22 1.36.19 1.87.12.57-.09 1.75-.72 2-1.41.25-.7.25-1.29.17-1.41-.07-.13-.27-.2-.57-.35M12.05 21.8h-.01a9.86 9.86 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.45 4.44-9.88 9.9-9.88a9.83 9.83 0 0 1 9.88 9.89c0 5.45-4.44 9.88-9.89 9.88m8.41-18.3A11.82 11.82 0 0 0 12.05 0C5.5 0 .16 5.34.16 11.9c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.88 11.88 0 0 0 5.68 1.45h.01c6.55 0 11.89-5.34 11.9-11.9a11.82 11.82 0 0 0-3.49-8.4"/></svg>',
+  doc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/></svg>',
+  share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>',
+  print:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>'
+};
+function coverHTML(p, cls = 'cover'){
+  const src = safeImg(p.photos && p.photos[0]);
+  if (src) return `<img class="${cls}" src="${esc(src)}" alt="Foto de ${esc(p.name)}" loading="lazy">`;
+  return `<div class="${cls} ph" style="background:${hashColor(p.category)}" aria-hidden="true">${esc(catIcon(p.category))}<span class="ini">${esc(initials(p.name))}</span></div>`;
+}
+function priceHTML(p){
+  if (p.price_unit === 'a combinar' || !(Number(p.price) > 0)) return `<small>Preço</small><strong style="font-size:15px">A combinar</strong>`;
+  return `<small>a partir de</small><strong>${esc(BRL.format(p.price))}</strong> <span class="unit">${esc(p.price_unit)}</span>`;
+}
+function starsHTML(avg){ return `<span class="stars" style="--w:${Math.max(0, Math.min(100, avg/5*100)).toFixed(1)}%" aria-label="${avg.toFixed(1).replace('.',',')} de 5 estrelas">★★★★★</span>`; }
+function ratingHTML(r){
+  if (!r) return `<span class="new-pill">Novo por aqui</span>`;
+  return `${starsHTML(r.avg)} <strong>${r.avg.toFixed(1).replace('.',',')}</strong> <span class="muted">(${r.n} ${r.n === 1 ? 'avaliação' : 'avaliações'})</span>`;
+}
+const STATUS = { pending:['Pendente','st-pending'], approved:['Aprovado','st-approved'], paused:['Pausado','st-paused'], rejected:['Recusado','st-rejected'] };
+const statusPill = s => { const [l, c] = STATUS[s] || [s, 'st-paused']; return `<span class="status-pill ${c}">${esc(l)}</span>`; };
+
+/* ---------------- Aba 1: Busca ---------------- */
+function filtered(rm){
+  const { q, cat, city, hood, sort } = S.f;
+  const words = norm(q).split(/\s+/).filter(Boolean);
+  const list = S.providers.filter(p => {
+    if (cat && p.category !== cat) return false;
+    if (city && p.city !== city) return false;
+    if (hood && p.neighborhood !== hood) return false;
+    if (words.length) { const hay = norm([p.name, p.category, p.description, p.neighborhood, p.city].join(' ')); return words.every(w => hay.includes(w)); }
+    return true;
+  });
+  const avg = p => rm[p.id] ? rm[p.id].avg : 0, cnt = p => rm[p.id] ? rm[p.id].n : 0;
+  const pr = p => (p.price_unit === 'a combinar' || !(Number(p.price) > 0)) ? Infinity : Number(p.price);
+  if (sort === 'price') list.sort((a,b) => pr(a) - pr(b) || avg(b) - avg(a));
+  else if (sort === 'recent') list.sort((a,b) => String(b.created_at).localeCompare(String(a.created_at)));
+  else list.sort((a,b) => avg(b) - avg(a) || cnt(b) - cnt(a) || String(b.created_at).localeCompare(String(a.created_at)));
+  return list;
+}
+function fillSelect(sel, items, current, allLabel){
+  const vals = new Set(items);
+  if (current && !vals.has(current)) current = '';
+  sel.innerHTML = `<option value="">${esc(allLabel)}</option>` + items.map(v => `<option value="${esc(v)}"${v === current ? ' selected' : ''}>${esc(v)}</option>`).join('');
+  return current;
+}
+function renderSearch(){
+  const rm = ratings();
+  const byCat = {}; S.providers.forEach(p => byCat[p.category] = (byCat[p.category] || 0) + 1);
+  const cats = CATEGORIES.map(c => c[0]).filter(c => byCat[c]);
+  Object.keys(byCat).forEach(c => { if (!cats.includes(c)) cats.push(c); });
+  S.f.cat = fillSelect($('#fCat'), cats, S.f.cat, 'Todas');
+  const cities = [...new Set(S.providers.map(p => p.city))].sort((a,b) => a.localeCompare(b,'pt-BR'));
+  S.f.city = fillSelect($('#fCity'), cities, S.f.city, 'Todas');
+  const hoods = [...new Set(S.providers.filter(p => !S.f.city || p.city === S.f.city).map(p => p.neighborhood))].sort((a,b) => a.localeCompare(b,'pt-BR'));
+  S.f.hood = fillSelect($('#fHood'), hoods, S.f.hood, 'Todos');
+  $('#fSort').value = S.f.sort;
+
+  $('#chips').innerHTML = `<button class="chip${!S.f.cat ? ' active' : ''}" data-action="chip" data-v="">Todos <span class="n">${S.providers.length}</span></button>` +
+    cats.map(c => `<button class="chip${S.f.cat === c ? ' active' : ''}" data-action="chip" data-v="${esc(c)}">${esc(catIcon(c))} ${esc(c)} <span class="n">${byCat[c]}</span></button>`).join('');
+
+  const hasFilter = S.f.q || S.f.cat || S.f.city || S.f.hood;
+  $('#btnClear').classList.toggle('hidden', !hasFilter);
+  const box = $('#results');
+
+  if (!S.loaded) {
+    $('#resultsTitle').textContent = 'Carregando profissionais…';
+    box.innerHTML = Array.from({ length:6 }, () => `<div class="card pcard" style="cursor:default"><div class="cover skel" style="border-radius:0"></div><div class="pbody"><div class="skel" style="height:14px;width:40%"></div><div class="skel" style="height:18px;width:75%"></div><div class="skel" style="height:14px;width:55%"></div></div></div>`).join('');
+    return;
+  }
+  if (S.loadError) {
+    $('#resultsTitle').textContent = 'Não foi possível carregar';
+    box.innerHTML = `<div class="card empty" style="grid-column:1/-1"><div class="big">📡</div><h2>Algo deu errado</h2><p class="muted">${esc(S.loadError)}</p><button class="btn" data-action="retry">Tentar de novo</button></div>`;
+    return;
+  }
+  const list = filtered(rm);
+  $('#resultsTitle').textContent = list.length === 0 ? 'Nenhum profissional encontrado' : `${list.length} ${list.length === 1 ? 'profissional encontrado' : 'profissionais encontrados'}`;
+  if (!list.length) {
+    box.innerHTML = `<div class="card empty" style="grid-column:1/-1"><div class="big">🔍</div><h2>${S.providers.length ? 'Ninguém com esses filtros ainda' : 'Ainda não há profissionais cadastrados'}</h2>
+      <p class="muted">${S.providers.length ? 'Tente outra palavra, outro bairro ou limpe os filtros.' : 'Seja o primeiro a divulgar seu trabalho por aqui.'}</p>
+      <div class="row" style="justify-content:center">${hasFilter ? '<button class="btn btn-ghost" data-action="clear-filters">Limpar filtros</button>' : ''}<button class="btn btn-accent" data-tab="register">Sou prestador, quero me cadastrar</button></div></div>`;
+    return;
+  }
+  box.innerHTML = list.map(p => `
+    <article class="card pcard" data-action="open" data-id="${esc(p.id)}" tabindex="0" aria-label="Ver perfil de ${esc(p.name)}">
+      ${coverHTML(p)}
+      <div class="pbody">
+        <span class="tag">${esc(catIcon(p.category))} ${esc(p.category)}</span>
+        <h3 class="pname">${esc(p.name)}</h3>
+        <div class="loc">${IC.pin}${esc(p.neighborhood)} · ${esc(p.city)}</div>
+        <div class="rating">${ratingHTML(rm[p.id])}</div>
+        <div class="pfoot">
+          <div class="price">${priceHTML(p)}</div>
+          <a class="btn btn-wa btn-sm" data-action="link" href="${esc(waLink(p))}" target="_blank" rel="noopener" aria-label="Chamar ${esc(p.name)} no WhatsApp">${IC.wa}WhatsApp</a>
+        </div>
+      </div>
+    </article>`).join('');
+}
+
+/* ---------------- Perfil ---------------- */
+function openProfile(id){
+  const p = findProvider(id);
+  if (!p) { toast('Esse perfil não está disponível.', 'error'); return; }
+  S.open = { id, star:0 };
+  renderProfile();
+  $('#modal').classList.remove('hidden');
+  document.body.classList.add('modal-open');
+  $('#modal').scrollTop = 0;
+  try { history.replaceState(null, '', '#prestador/' + encodeURIComponent(id)); } catch {}
+}
+function closeModal(){
+  $('#modal').classList.add('hidden'); document.body.classList.remove('modal-open'); S.open = null;
+  try { history.replaceState(null, '', location.pathname + location.search); } catch {}
+}
+function renderProfile(){
+  if (!S.open) return;
+  const p = findProvider(S.open.id); if (!p) { closeModal(); return; }
+  const rm = ratings(), r = rm[p.id];
+  const revs = S.reviews.filter(x => x.provider_id === p.id);
+  const photos = (p.photos || []).map(safeImg).filter(Boolean);
+  const approved = p.status === 'approved';
+  const dist = [5,4,3,2,1].map(n => [n, revs.filter(x => Number(x.stars) === n).length]);
+
+  $('#modalBody').innerHTML = `
+    ${photos.length ? `<img class="gallery-main" id="gMain" src="${esc(photos[0])}" alt="Foto de ${esc(p.name)}">` : coverHTML(p, 'gallery-main')}
+    ${photos.length > 1 ? `<div class="thumbs">${photos.map((u,i) => `<img class="thumb${i === 0 ? ' on' : ''}" src="${esc(u)}" data-action="thumb" data-i="${i}" alt="Foto ${i+1}">`).join('')}</div>` : ''}
+    <div class="pf-body">
+      ${!approved ? `<div class="inner" style="padding:12px 16px;margin-bottom:16px">Visualização do admin · Status: ${statusPill(p.status)} — este perfil não aparece para os clientes.</div>` : ''}
+      <div class="pf-head">
+        <div class="stack" style="gap:8px">
+          <span class="tag">${esc(catIcon(p.category))} ${esc(p.category)}</span>
+          <h1>${esc(p.name)}</h1>
+          <div class="loc" style="font-size:14px">${IC.pin}${esc(p.neighborhood)} · ${esc(p.city)}</div>
+          <div class="rating">${ratingHTML(r)}</div>
+        </div>
+        <div class="price" style="text-align:right">${priceHTML(p)}</div>
+      </div>
+      <div class="pf-actions">
+        <a class="btn btn-wa" href="${esc(waLink(p))}" target="_blank" rel="noopener">${IC.wa}Chamar no WhatsApp</a>
+        ${approved ? `<button class="btn btn-accent" data-action="show-quote">${IC.doc}Pedir orçamento</button>` : ''}
+        <button class="btn btn-ghost" data-action="share">${IC.share}Compartilhar</button>
+      </div>
+
+      <div id="quoteBox" class="inner section hidden">
+        <h2>Pedir orçamento</h2>
+        <p class="muted small" style="margin:4px 0 16px">Preencha e a gente abre o WhatsApp de ${esc(p.name.split(' ')[0])} com seu pedido já escrito. É só tocar em enviar.</p>
+        <div id="quoteOk" class="inline-ok hidden" style="margin-bottom:16px"></div>
+        <form id="quoteForm" class="form-grid" novalidate>
+          <div class="field"><label for="qName">Seu nome <span class="req">*</span></label><input id="qName" name="client_name" maxlength="80" autocomplete="name"><div class="err"></div></div>
+          <div class="field"><label for="qPhone">Seu telefone <span class="muted">(opcional)</span></label><input id="qPhone" name="client_phone" inputmode="tel" placeholder="(89) 99999-9999"><div class="err"></div></div>
+          <div class="field"><label for="qHood">Seu bairro <span class="req">*</span></label><input id="qHood" name="neighborhood" maxlength="60"><div class="err"></div></div>
+          <div class="field"><label for="qWhen">Para quando?</label><select id="qWhen" name="preferred_when">${WHEN_OPTS.map(o => `<option>${esc(o)}</option>`).join('')}</select></div>
+          <div class="field span2"><label for="qDet">O que você precisa? <span class="req">*</span></label><textarea id="qDet" name="details" maxlength="1000" placeholder="Ex: trocar 3 tomadas e instalar um chuveiro novo na casa."></textarea><div class="err"></div></div>
+          <div class="span2 row end"><button class="btn btn-ghost" type="button" data-action="hide-quote">Cancelar</button><button class="btn btn-wa" type="submit">${IC.wa}Enviar pelo WhatsApp</button></div>
+        </form>
+      </div>
+
+      <div class="section"><h2>Sobre o serviço</h2><p class="desc" style="margin-top:8px">${esc(p.description)}</p></div>
+
+      <div class="section">
+        <h2>Avaliações</h2>
+        ${r ? `<div class="summary"><div class="big">${r.avg.toFixed(1).replace('.',',')}</div><div>${starsHTML(r.avg)}<div class="muted small">${r.n} ${r.n === 1 ? 'avaliação' : 'avaliações'}</div></div>
+              <div class="dist">${dist.map(([n,c]) => `<span>${n}★</span><span class="bar"><i style="width:${(c/r.n*100).toFixed(0)}%"></i></span><span>${c}</span>`).join('')}</div></div>`
+            : `<p class="muted" style="margin:8px 0 16px">Ainda sem avaliações. Contratou ${esc(p.name.split(' ')[0])}? Conte como foi!</p>`}
+        <div>${revs.map(x => `
+          <div class="rv"><div class="rv-head"><strong>${esc(x.author)}</strong><span class="muted small">${esc(fmtDate(x.created_at))}</span></div>
+          ${starsHTML(Number(x.stars))}${x.comment ? `<p style="margin-top:6px">${esc(x.comment)}</p>` : ''}</div>`).join('')}</div>
+
+        ${approved ? `
+        <form id="reviewForm" class="inner section" novalidate>
+          <h3>Deixe sua avaliação</h3>
+          <div class="stack" style="margin-top:16px">
+            <div class="field"><span class="label">Sua nota <span class="req">*</span></span>
+              <div class="star-input" role="radiogroup" aria-label="Nota de 1 a 5">${[1,2,3,4,5].map(n => `<button type="button" class="star-btn" data-action="star" data-v="${n}" aria-label="${n} estrela${n > 1 ? 's' : ''}">★</button>`).join('')}</div>
+              <input type="hidden" name="stars" value="0"><div class="err"></div></div>
+            <div class="field"><label for="rvName">Seu nome <span class="req">*</span></label><input id="rvName" name="author" maxlength="60" placeholder="Ex: Carla S."><div class="err"></div></div>
+            <div class="field"><label for="rvCom">Comentário <span class="muted">(opcional)</span></label><textarea id="rvCom" name="comment" maxlength="500" style="min-height:80px" placeholder="Como foi o atendimento?"></textarea><div class="err"></div></div>
+            <div class="row end"><button class="btn" type="submit" id="rvBtn">Publicar avaliação</button></div>
+          </div>
+        </form>` : ''}
+      </div>
+    </div>`;
+}
+function paintStars(n){
+  $$('#reviewForm .star-btn').forEach(b => b.classList.toggle('on', Number(b.dataset.v) <= n));
+}
+
+async function onReview(form){
+  clearErrs(form);
+  const stars = Number(form.elements.stars.value), author = form.elements.author.value.trim(), comment = form.elements.comment.value.trim();
+  let ok = true;
+  if (!(stars >= 1 && stars <= 5)) { setErr(form.elements.stars, 'Escolha de 1 a 5 estrelas.'); ok = false; }
+  if (author.length < 2) { setErr(form.elements.author, 'Informe seu nome.'); ok = false; }
+  if (!ok) return;
+  const btn = $('#rvBtn'); btn.disabled = true; btn.textContent = 'Publicando…';
+  try {
+    await api.createReview({ provider_id:S.open.id, author, stars, comment:comment || null });
+    toast('Obrigado! Sua avaliação foi publicada.', 'success');
+    S.reviews = await api.reviews();
+    renderProfile(); renderSearch(); if (S.isAdmin) renderAdmin();
+  } catch (e) {
+    toast(friendlyError(e), 'error'); btn.disabled = false; btn.textContent = 'Publicar avaliação';
+  }
+}
+function onQuote(form){
+  clearErrs(form);
+  const p = findProvider(S.open.id);
+  const v = n => form.elements[n].value.trim();
+  let ok = true;
+  if (v('client_name').length < 2) { setErr(form.elements.client_name, 'Informe seu nome.'); ok = false; }
+  if (v('client_phone') && String(v('client_phone')).replace(/\D/g,'').length < 10) { setErr(form.elements.client_phone, 'Telefone incompleto. Use DDD + número.'); ok = false; }
+  if (v('neighborhood').length < 2) { setErr(form.elements.neighborhood, 'Informe seu bairro.'); ok = false; }
+  if (v('details').length < 10) { setErr(form.elements.details, 'Conte um pouco mais (mínimo 10 caracteres).'); ok = false; }
+  if (!ok) { const bad = $('.field.invalid input, .field.invalid textarea', form); if (bad) bad.focus(); return; }
+  const q = { provider_id:p.id, client_name:v('client_name'), client_phone:v('client_phone') || null, neighborhood:v('neighborhood'), preferred_when:v('preferred_when'), details:v('details') };
+  const msg = `*Pedido de orçamento — Chama Aí*\n\nOlá, ${p.name}! Vi seu perfil e gostaria de um orçamento.\n\n*Nome:* ${q.client_name}\n*Bairro:* ${q.neighborhood}${q.client_phone ? `\n*Telefone:* ${q.client_phone}` : ''}\n*Para quando:* ${q.preferred_when}\n\n*O que preciso:*\n${q.details}`;
+  window.open(waLink(p, msg), '_blank', 'noopener');
+  api.createQuote(q).catch(e => console.warn('Cópia do orçamento não salva:', e));
+  form.reset();
+  const okBox = $('#quoteOk'); okBox.textContent = '✅ Pronto! O WhatsApp foi aberto com seu pedido. É só tocar em enviar por lá.'; okBox.classList.remove('hidden');
+}
+async function share(){
+  const p = findProvider(S.open.id);
+  const url = location.href.split('#')[0] + '#prestador/' + encodeURIComponent(p.id);
+  try {
+    if (navigator.share) { await navigator.share({ title:p.name + ' — Chama Aí', text:`${p.name} · ${p.category} em ${p.city}`, url }); return; }
+    await navigator.clipboard.writeText(url); toast('Link do perfil copiado!', 'success');
+  } catch (e) { if (e && e.name !== 'AbortError') toast('Não foi possível copiar. Link: ' + url); }
+}
+
+/* ---------------- Aba 2: Cadastro ---------------- */
+function setupRegister(){
+  $('#rCat').innerHTML = '<option value="">Escolha…</option>' + CATEGORIES.map(([c,i]) => `<option value="${esc(c)}">${esc(i)} ${esc(c)}</option>`).join('');
+  $('#rUnit').innerHTML = PRICE_UNITS.map(u => `<option value="${esc(u)}">${esc(u.charAt(0).toUpperCase() + u.slice(1))}</option>`).join('');
+}
+function refreshDatalists(){
+  const all = S.providers.concat(S.adminProviders);
+  $('#dlCity').innerHTML = [...new Set(all.map(p => p.city))].map(c => `<option value="${esc(c)}">`).join('');
+  $('#dlHood').innerHTML = [...new Set(all.map(p => p.neighborhood))].map(c => `<option value="${esc(c)}">`).join('');
+}
+function renderPreviews(){
+  $('#previews').innerHTML = S.regPhotos.map((ph, i) => `<div class="prev"><img src="${esc(ph.url)}" alt="Foto ${i+1}"><button type="button" data-action="rm-photo" data-i="${i}" aria-label="Remover foto">×</button>${i === 0 ? '<span class="first">Capa</span>' : ''}</div>`).join('');
+  $('#photoDrop').classList.toggle('hidden', S.regPhotos.length >= 4);
+}
+async function onPhotos(input){
+  const files = Array.from(input.files || []); input.value = '';
+  const room = 4 - S.regPhotos.length;
+  if (files.length > room) toast(`Máximo de 4 fotos. ${room > 0 ? `Vou usar só ${room}.` : ''}`, 'error');
+  for (const f of files.slice(0, Math.max(0, room))) {
+    if (!/^image\//.test(f.type)) { toast(`"${f.name}" não é uma imagem.`, 'error'); continue; }
+    try {
+      const blob = await compressImage(f, LIVE ? 1280 : 720, LIVE ? .8 : .6);
+      S.regPhotos.push({ blob, url:URL.createObjectURL(blob) });
+    } catch (e) { toast(e.message, 'error'); }
+  }
+  renderPreviews();
+}
+function togglePriceField(){
+  const combinar = $('#rUnit').value === 'a combinar';
+  const pf = $('#rPrice'); pf.disabled = combinar;
+  if (combinar) { pf.value = ''; setErr(pf, ''); }
+  pf.placeholder = combinar ? 'Preço a combinar' : 'Ex: 80';
+}
+async function onRegister(form){
+  if (S.busy) return;
+  clearErrs(form);
+  const el = n => form.elements[n], v = n => el(n).value.trim();
+  const bad = [];
+  const check = (n, cond, msg) => { if (!cond) { setErr(el(n), msg); bad.push(el(n)); } };
+  const wa = normalizePhone(v('whatsapp'));
+  const unit = v('price_unit'), price = parsePrice(v('price'));
+  check('name', v('name').length >= 3, 'Informe seu nome (mínimo 3 letras).');
+  check('whatsapp', !!wa, 'WhatsApp inválido. Use DDD + número, ex: (89) 99999-9999.');
+  check('category', !!v('category'), 'Escolha uma categoria.');
+  check('city', v('city').length >= 2, 'Informe a cidade.');
+  check('neighborhood', v('neighborhood').length >= 2, 'Informe o bairro.');
+  check('price_unit', PRICE_UNITS.includes(unit), 'Escolha como você cobra.');
+  if (unit !== 'a combinar') check('price', price !== null && price > 0 && price < 1000000, 'Informe o preço inicial, ex: 80 (ou escolha "A combinar").');
+  check('description', v('description').length >= 20, `Descreva seu serviço com pelo menos 20 caracteres (faltam ${Math.max(0, 20 - v('description').length)}).`);
+  check('terms', el('terms').checked, 'Marque esta opção para enviar.');
+  if (bad.length) { bad[0].focus(); toast('Confira os campos marcados em vermelho.', 'error'); return; }
+
+  const btn = $('#regBtn'); S.busy = true; btn.disabled = true; btn.textContent = S.regPhotos.length ? 'Enviando fotos e dados…' : 'Enviando…';
+  try {
+    await api.createProvider({
+      name:v('name'), whatsapp:wa, category:v('category'), city:v('city'), neighborhood:v('neighborhood'),
+      price:unit === 'a combinar' ? 0 : price, price_unit:unit, description:v('description')
+    }, S.regPhotos.map(p => p.blob));
+    form.reset(); togglePriceField(); $('#descCount').textContent = '0/1000';
+    S.regPhotos.forEach(p => URL.revokeObjectURL(p.url)); S.regPhotos = []; renderPreviews();
+    form.classList.add('hidden'); $('#regSuccess').classList.remove('hidden');
+    window.scrollTo({ top:0, behavior:'smooth' });
+    if (S.isAdmin) loadAll();
+  } catch (e) { toast(friendlyError(e), 'error'); }
+  finally { S.busy = false; btn.disabled = false; btn.textContent = 'Enviar cadastro para aprovação'; }
+}
+
+/* ---------------- Aba 3: Admin ---------------- */
+function renderAdmin(){
+  const root = $('#adminRoot');
+  const pend = S.adminProviders.filter(p => p.status === 'pending');
+  const badge = $('#pendingBadge');
+  badge.textContent = pend.length; badge.classList.toggle('hidden', !S.isAdmin || !pend.length);
+
+  if (!S.isAdmin) {
+    root.innerHTML = `
+      <form id="loginForm" class="card login-box" novalidate>
+        <h1>Área do administrador</h1>
+        <p class="muted" style="margin:6px 0 24px">Entre para aprovar cadastros e acompanhar o app.</p>
+        ${!LIVE ? `<div class="inner small" style="padding:12px 16px;margin-bottom:16px">🧪 <strong>Modo demonstração:</strong> use a senha <strong>${esc(CONFIG.DEMO_ADMIN_PASSWORD)}</strong> (o e-mail pode ficar em branco).</div>` : ''}
+        <div class="stack">
+          <div class="field"><label for="lEmail">E-mail${LIVE ? ' <span class="req">*</span>' : ''}</label><input id="lEmail" name="email" type="email" autocomplete="username" placeholder="voce@email.com"><div class="err"></div></div>
+          <div class="field"><label for="lPass">Senha <span class="req">*</span></label><input id="lPass" name="password" type="password" autocomplete="current-password"><div class="err"></div></div>
+          <button class="btn btn-block" type="submit" id="loginBtn">Entrar</button>
+        </div>
+      </form>`;
+    return;
+  }
+
+  const approved = S.adminProviders.filter(p => p.status === 'approved');
+  const others = S.adminProviders.filter(p => p.status === 'paused' || p.status === 'rejected');
+  const rm = ratings();
+  const avgAll = S.reviews.length ? S.reviews.reduce((s,r) => s + Number(r.stars), 0) / S.reviews.length : 0;
+  const nameOf = id => { const p = S.adminProviders.find(x => x.id === id); return p ? p.name : '(removido)'; };
+  const segs = [['pending','Pendentes',pend.length],['approved','Aprovados',approved.length],['others','Pausados e recusados',others.length],['reviews','Avaliações',S.reviews.length],['quotes','Orçamentos',S.quotes.length]];
+  const T = S.adminTab;
+
+  let body = '';
+  if (T === 'pending') {
+    body = pend.length ? pend.map(p => {
+      const ph = (p.photos || []).map(safeImg).filter(Boolean);
+      return `<div class="card pend">
+        <div class="pend-photos">${ph.length ? ph.map(u => `<img${ph.length === 1 ? ' class="solo"' : ''} src="${esc(u)}" alt="">`).join('') : `<div class="ph solo" style="background:${hashColor(p.category)}">${esc(catIcon(p.category))}</div>`}</div>
+        <div>
+          <div class="row between"><h2>${esc(p.name)}</h2>${statusPill(p.status)}</div>
+          <div class="kv">
+            <div><span>Categoria</span>${esc(p.category)}</div>
+            <div><span>WhatsApp</span><a href="${esc(waLink(p, 'Olá! Aqui é do Chama Aí, sobre o seu cadastro.'))}" target="_blank" rel="noopener">${esc(fmtPhone(p.whatsapp))}</a></div>
+            <div><span>Local</span>${esc(p.neighborhood)} · ${esc(p.city)}</div>
+            <div><span>Preço</span>${p.price_unit === 'a combinar' ? 'A combinar' : esc(BRL.format(p.price) + ' ' + p.price_unit)}</div>
+            <div><span>Enviado em</span>${esc(fmtDate(p.created_at))}</div>
+            <div><span>Fotos</span>${ph.length}</div>
+          </div>
+          <p class="desc small" style="background:#F8FAFB;border-radius:8px;padding:12px 16px">${esc(p.description)}</p>
+          <div class="row" style="margin-top:16px">
+            <button class="btn btn-success" data-action="approve" data-id="${esc(p.id)}">✓ Aprovar</button>
+            <button class="btn btn-ghost-danger" data-action="reject" data-id="${esc(p.id)}">Recusar</button>
+            <button class="btn btn-ghost" data-action="open" data-id="${esc(p.id)}">Ver como cliente</button>
+          </div>
+        </div></div>`;
+    }).join('') : `<div class="card empty"><div class="big">🎉</div><h2>Tudo em dia!</h2><p class="muted">Nenhum cadastro esperando aprovação.</p></div>`;
+  } else if (T === 'approved' || T === 'others') {
+    const list = T === 'approved' ? approved : others;
+    body = `<div class="card"><h2>${T === 'approved' ? 'Prestadores aprovados' : 'Pausados e recusados'}</h2><p class="muted small" style="margin:4px 0 16px">${T === 'approved' ? 'Estes aparecem para os clientes.' : 'Estes não aparecem para os clientes. Você pode reativar quando quiser.'}</p>
+      ${list.length ? `<div class="table-wrap"><table><thead><tr><th>Nome</th><th>Categoria</th><th>Local</th><th>WhatsApp</th><th>Nota</th><th>Status</th><th class="no-print">Ações</th></tr></thead><tbody>
+      ${list.map(p => `<tr><td><strong>${esc(p.name)}</strong></td><td>${esc(p.category)}</td><td>${esc(p.neighborhood)} · ${esc(p.city)}</td><td>${esc(fmtPhone(p.whatsapp))}</td>
+        <td>${rm[p.id] ? `★ ${rm[p.id].avg.toFixed(1).replace('.',',')} (${rm[p.id].n})` : '<span class="muted">—</span>'}</td><td>${statusPill(p.status)}</td>
+        <td class="no-print"><div class="acts"><button class="btn btn-ghost btn-sm" data-action="open" data-id="${esc(p.id)}">Ver</button>
+        ${p.status === 'approved' ? `<button class="btn btn-ghost btn-sm" data-action="pause" data-id="${esc(p.id)}">Pausar</button>` : `<button class="btn btn-success btn-sm" data-action="approve" data-id="${esc(p.id)}">Reativar</button>`}
+        <button class="btn btn-ghost-danger btn-sm" data-action="del-provider" data-id="${esc(p.id)}">Excluir</button></div></td></tr>`).join('')}
+      </tbody></table></div>` : '<p class="muted">Nada por aqui.</p>'}</div>`;
+  } else if (T === 'reviews') {
+    body = `<div class="card"><h2>Avaliações</h2><p class="muted small" style="margin:4px 0 16px">Apague avaliações ofensivas ou falsas.</p>
+      ${S.reviews.length ? `<div class="table-wrap"><table><thead><tr><th>Data</th><th>Prestador</th><th>Autor</th><th>Nota</th><th>Comentário</th><th class="no-print">Ações</th></tr></thead><tbody>
+      ${S.reviews.map(r => `<tr><td>${esc(fmtDate(r.created_at))}</td><td>${esc(nameOf(r.provider_id))}</td><td>${esc(r.author)}</td><td style="white-space:nowrap">${'★'.repeat(r.stars)}<span style="color:#D9DEE1">${'★'.repeat(5 - r.stars)}</span></td><td>${esc(r.comment || '—')}</td>
+        <td class="no-print"><button class="btn btn-ghost-danger btn-sm" data-action="del-review" data-id="${esc(r.id)}">Apagar</button></td></tr>`).join('')}
+      </tbody></table></div>` : '<p class="muted">Nenhuma avaliação ainda.</p>'}</div>`;
+  } else {
+    body = `<div class="card"><h2>Pedidos de orçamento</h2><p class="muted small" style="margin:4px 0 16px">Cópia de cada pedido enviado pelos clientes no WhatsApp.</p>
+      ${S.quotes.length ? `<div class="table-wrap"><table><thead><tr><th>Data</th><th>Prestador</th><th>Cliente</th><th>Bairro</th><th>Quando</th><th>Pedido</th><th class="no-print">Ações</th></tr></thead><tbody>
+      ${S.quotes.map(q => `<tr><td>${esc(fmtDate(q.created_at))}</td><td>${esc(nameOf(q.provider_id))}</td><td><strong>${esc(q.client_name)}</strong>${q.client_phone ? `<div class="muted small">${esc(q.client_phone)}</div>` : ''}</td><td>${esc(q.neighborhood)}</td><td>${esc(q.preferred_when || '—')}</td><td style="min-width:220px">${esc(q.details)}</td>
+        <td class="no-print"><button class="btn btn-ghost-danger btn-sm" data-action="del-quote" data-id="${esc(q.id)}">Apagar</button></td></tr>`).join('')}
+      </tbody></table></div>` : '<p class="muted">Nenhum pedido de orçamento ainda.</p>'}</div>`;
+  }
+
+  root.innerHTML = `
+    <div class="row between">
+      <div><h1>Painel do administrador</h1><p class="muted small">Atualizado em ${esc(new Date().toLocaleString('pt-BR'))}</p></div>
+      <div class="row" style="gap:8px">
+        ${!LIVE ? '<button class="btn btn-ghost btn-sm" data-action="reset-demo">Restaurar exemplos</button>' : ''}
+        <button class="btn btn-ghost btn-sm" data-action="refresh">Atualizar</button>
+        <button class="btn btn-ghost btn-sm" data-action="print">${IC.print}Imprimir / PDF</button>
+        <button class="btn btn-ghost-danger btn-sm" data-action="logout">Sair</button>
+      </div>
+    </div>
+    <div class="stats section" style="margin-top:24px">
+      <div class="card stat"><div class="l">Aguardando aprovação</div><div class="v" style="color:var(--accent)">${pend.length}</div></div>
+      <div class="card stat"><div class="l">Prestadores no ar</div><div class="v" style="color:var(--primary)">${approved.length}</div></div>
+      <div class="card stat"><div class="l">Avaliações</div><div class="v">${S.reviews.length}</div><div class="small muted">${S.reviews.length ? `média ★ ${avgAll.toFixed(1).replace('.',',')}` : 'sem avaliações'}</div></div>
+      <div class="card stat"><div class="l">Pedidos de orçamento</div><div class="v">${S.quotes.length}</div></div>
+    </div>
+    <div class="seg section" style="margin-top:32px">${segs.map(([k,l,n]) => `<button class="chip${T === k ? ' active' : ''}" data-action="admin-tab" data-v="${k}">${esc(l)} <span class="n">${n}</span></button>`).join('')}</div>
+    <div class="stack" style="margin-top:16px">${body}</div>`;
+}
+async function onLogin(form){
+  clearErrs(form);
+  const email = form.elements.email.value.trim(), pass = form.elements.password.value;
+  let ok = true;
+  if (LIVE && !/^\S+@\S+\.\S+$/.test(email)) { setErr(form.elements.email, 'Informe um e-mail válido.'); ok = false; }
+  if (!pass) { setErr(form.elements.password, 'Informe a senha.'); ok = false; }
+  if (!ok) return;
+  const btn = $('#loginBtn'); btn.disabled = true; btn.textContent = 'Entrando…';
+  try {
+    await api.login(email, pass);
+    S.isAdmin = true; S.adminTab = 'pending';
+    toast('Bem-vindo ao painel!', 'success');
+    await loadAll();
+  } catch (e) {
+    setErr(form.elements.password, friendlyError(e)); btn.disabled = false; btn.textContent = 'Entrar';
+  }
+}
+async function adminAction(fn, okMsg){
+  try { await fn(); if (okMsg) toast(okMsg, 'success'); } catch (e) { toast(friendlyError(e), 'error'); }
+  await loadAll();
+}
+function confirmDialog(title, msg, okLabel = 'Confirmar'){
+  return new Promise(res => {
+    const c = $('#confirm'); $('#cfTitle').textContent = title; $('#cfMsg').textContent = msg; $('#cfYes').textContent = okLabel;
+    c.classList.remove('hidden');
+    const done = v => { c.classList.add('hidden'); $('#cfYes').onclick = $('#cfNo').onclick = c.onclick = null; res(v); };
+    $('#cfYes').onclick = () => done(true); $('#cfNo').onclick = () => done(false);
+    c.onclick = e => { if (e.target === c) done(false); };
+    $('#cfYes').focus();
+  });
+}
+
+/* ---------------- Navegação ---------------- */
+function showTab(name){
+  S.tab = name;
+  $$('.tab').forEach(t => { const on = t.dataset.tab === name; t.classList.toggle('active', on); t.setAttribute('aria-selected', on); });
+  $$('.view').forEach(v => v.classList.toggle('hidden', v.id !== 'view-' + name));
+  if (name === 'register') { $('#regForm').classList.remove('hidden'); $('#regSuccess').classList.add('hidden'); refreshDatalists(); }
+  if (name === 'admin') renderAdmin();
+  if (!$('#modal').classList.contains('hidden')) closeModal();
+  window.scrollTo({ top:0 });
+}
+function renderAll(){
+  renderSearch(); renderAdmin(); refreshDatalists();
+  if (S.open) renderProfile();
+}
+
+/* ---------------- Eventos ---------------- */
+document.addEventListener('click', async e => {
+  const t = e.target.closest('[data-tab],[data-action]');
+  if (!t) { if (e.target.id === 'modal') closeModal(); return; }
+  if (t.dataset.tab) { e.preventDefault(); showTab(t.dataset.tab); return; }
+  const a = t.dataset.action, id = t.dataset.id;
+  switch (a) {
+    case 'link': return; // deixa o link abrir normalmente
+    case 'go-home': e.preventDefault(); S.f = { q:'', cat:'', city:'', hood:'', sort:S.f.sort }; $('#fQ').value = ''; showTab('search'); renderSearch(); break;
+    case 'open': openProfile(id); break;
+    case 'close-modal': closeModal(); break;
+    case 'chip': S.f.cat = t.dataset.v; renderSearch(); break;
+    case 'clear-filters': S.f = { q:'', cat:'', city:'', hood:'', sort:S.f.sort }; $('#fQ').value = ''; renderSearch(); break;
+    case 'retry': S.loaded = false; S.loadError = null; renderSearch(); loadAll(); break;
+    case 'thumb': { const m = $('#gMain'); if (m) m.src = t.src; $$('.thumb').forEach(x => x.classList.toggle('on', x === t)); break; }
+    case 'star': { const n = Number(t.dataset.v); const f = $('#reviewForm'); f.elements.stars.value = n; paintStars(n); setErr(f.elements.stars, ''); break; }
+    case 'show-quote': { const b = $('#quoteBox'); b.classList.remove('hidden'); $('#quoteOk').classList.add('hidden'); b.scrollIntoView({ behavior:'smooth', block:'start' }); setTimeout(() => $('#qName').focus({ preventScroll:true }), 350); break; }
+    case 'hide-quote': $('#quoteBox').classList.add('hidden'); break;
+    case 'share': share(); break;
+    case 'rm-photo': { const i = Number(t.dataset.i); const [ph] = S.regPhotos.splice(i, 1); if (ph) URL.revokeObjectURL(ph.url); renderPreviews(); break; }
+    case 'reg-again': $('#regSuccess').classList.add('hidden'); $('#regForm').classList.remove('hidden'); break;
+    case 'admin-tab': S.adminTab = t.dataset.v; renderAdmin(); break;
+    case 'approve': adminAction(() => api.setStatus(id, 'approved'), 'Prestador aprovado! Já aparece no catálogo.'); break;
+    case 'reject': if (await confirmDialog('Recusar cadastro?', 'Ele não vai aparecer para os clientes. Você pode reativar depois na aba "Pausados e recusados".', 'Recusar')) adminAction(() => api.setStatus(id, 'rejected'), 'Cadastro recusado.'); break;
+    case 'pause': adminAction(() => api.setStatus(id, 'paused'), 'Prestador pausado. Ele saiu do catálogo.'); break;
+    case 'del-provider': if (await confirmDialog('Excluir prestador?', 'Isso apaga o cadastro, as fotos, as avaliações e os orçamentos dele. Não dá para desfazer.', 'Excluir')) adminAction(() => api.deleteProvider(id), 'Prestador excluído.'); break;
+    case 'del-review': if (await confirmDialog('Apagar avaliação?', 'A avaliação some do perfil do prestador.', 'Apagar')) adminAction(() => api.deleteReview(id), 'Avaliação apagada.'); break;
+    case 'del-quote': if (await confirmDialog('Apagar pedido?', 'Remove só a cópia daqui. O que foi enviado no WhatsApp continua lá.', 'Apagar')) adminAction(() => api.deleteQuote(id), 'Pedido apagado.'); break;
+    case 'refresh': await loadAll(); toast('Dados atualizados.'); break;
+    case 'print': window.print(); break;
+    case 'reset-demo': if (await confirmDialog('Restaurar exemplos?', 'Apaga tudo que foi criado neste navegador e volta aos dados de exemplo.', 'Restaurar')) { DemoDB.reset(); await loadAll(); toast('Dados de exemplo restaurados.', 'success'); } break;
+    case 'logout': await api.logout(); S.isAdmin = false; S.adminProviders = []; S.quotes = []; await loadAll(); toast('Você saiu do painel.'); break;
+  }
+});
+document.addEventListener('submit', e => {
+  const f = e.target; e.preventDefault();
+  if (f.id === 'regForm') onRegister(f);
+  else if (f.id === 'reviewForm') onReview(f);
+  else if (f.id === 'quoteForm') onQuote(f);
+  else if (f.id === 'loginForm') onLogin(f);
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (!$('#confirm').classList.contains('hidden')) { $('#cfNo').click(); return; }
+    if (!$('#modal').classList.contains('hidden')) closeModal();
+  }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('pcard')) { e.preventDefault(); openProfile(e.target.dataset.id); }
+});
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.id === 'rWa' || t.id === 'qPhone') { t.value = maskPhone(t.value); }
+  if (t.id === 'rDesc') $('#descCount').textContent = `${t.value.length}/1000`;
+  if (t.closest && t.closest('.field.invalid')) setErr(t, '');
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.id === 'rPhotos') onPhotos(t);
+  if (t.id === 'rUnit') togglePriceField();
+  if (t.type === 'checkbox' && t.closest('.field.invalid')) setErr(t, '');
+  if (t.closest && t.closest('.field.invalid') && t.tagName === 'SELECT') setErr(t, '');
+});
+let qTimer;
+$('#fQ').addEventListener('input', e => { clearTimeout(qTimer); qTimer = setTimeout(() => { S.f.q = e.target.value; renderSearch(); }, 180); });
+$('#fCat').addEventListener('change', e => { S.f.cat = e.target.value; renderSearch(); });
+$('#fCity').addEventListener('change', e => { S.f.city = e.target.value; S.f.hood = ''; renderSearch(); });
+$('#fHood').addEventListener('change', e => { S.f.hood = e.target.value; renderSearch(); });
+$('#fSort').addEventListener('change', e => { S.f.sort = e.target.value; renderSearch(); });
+
+/* ---------------- Início ---------------- */
+async function init(){
+  $('#year').textContent = new Date().getFullYear();
+  const n = $('#notice');
+  if (!LIVE) { n.className = 'notice demo'; n.innerHTML = '🧪 <strong>Modo demonstração</strong> — os dados são exemplos e ficam salvos só neste navegador. Conecte o Supabase para publicar de verdade.'; }
+  else if (!sb) { n.className = 'notice bad'; n.textContent = 'Não foi possível carregar a conexão com o servidor. Verifique sua internet e recarregue a página.'; }
+  setupRegister(); togglePriceField(); renderSearch(); renderAdmin();
+  try { S.isAdmin = await api.session(); } catch (e) { console.warn(e); }
+  await loadAll();
+  const m = location.hash.match(/^#prestador\/(.+)$/);
+  if (m) openProfile(decodeURIComponent(m[1]));
+}
+init();
+</script>
+</body>
+</html>

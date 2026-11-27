@@ -1,0 +1,24 @@
+# Proxy HTTPS local (serviço `proxy` do docker-compose, perfil "https").
+# Os certificados vêm de scripts/https/setup.sh — o Caddy NÃO gera nem renova nada sozinho.
+{
+	admin off
+	auto_https off   # sem ACME, sem escutar 80/443 e sem redirecionamentos automáticos
+}
+
+# O app, por HTTPS. O Caddy repassa Host/X-Forwarded-* (o Next confere a origem das Server Actions com eles).
+:8443 {
+	tls /certs/server.crt /certs/server.key
+	encode zstd gzip
+	reverse_proxy app:3000
+}
+
+# Só a CA pública + a página de instalação, em HTTP: o celular precisa baixá-la ANTES de confiar no HTTPS.
+# /srv/web contém apenas ca.crt e index.html — a chave privada do servidor fica em /certs, que não é servido.
+:8080 {
+	root * /srv/web
+	@ca path /ca.crt
+	header @ca Content-Type application/x-x509-ca-cert
+	header @ca Content-Disposition `attachment; filename="chama-ai-ca.crt"`
+	header Cache-Control "no-store"
+	file_server
+}

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0f6b73">
+  <title>Instalar certificado | Chama Aí</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;padding:20px 16px 40px;background:#f4f7f8;color:#10242b;font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+    main{max-width:520px;margin:0 auto}
+    h1{font-size:22px;margin:0 0 6px}
+    h2{font-size:17px;margin:28px 0 8px}
+    p{margin:0 0 12px}
+    .muted{color:#5b6b72;font-size:14px}
+    .card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(16,36,43,.08);margin-top:16px}
+    .btn{display:block;text-align:center;text-decoration:none;font-weight:600;border-radius:10px;padding:14px 18px;min-height:48px;margin-top:12px}
+    .primary{background:#0f6b73;color:#fff}
+    .ghost{background:#fff;color:#0f6b73;border:1px solid #c9dfe1}
+    ol{margin:8px 0 0;padding-left:22px} li{margin-bottom:6px}
+    code{background:#e6f1f2;border-radius:6px;padding:1px 6px;font-size:13px;word-break:break-all}
+    .fp{font:12px/1.5 ui-monospace,monospace;word-break:break-all;background:#e6f1f2;border-radius:8px;padding:10px;margin-top:6px}
+  </style>
+</head>
+<body>
+<main>
+  <h1>Instalar o certificado</h1>
+  <p class="muted">Para o Chama Aí abrir por <strong>https</strong> neste aparelho — e poder ser instalado como app — o celular precisa confiar na autoridade de certificados local. É só uma vez.</p>
+
+  <div class="card">
+    <a class="btn primary" href="/ca.crt" download="chama-ai-ca.crt">1. Baixar o certificado</a>
+    <p class="muted" style="margin-top:12px">Impressão digital (SHA-256) — confira se for pedida:</p>
+    <div class="fp">__FINGERPRINT__</div>
+  </div>
+
+  <h2>2. Instalar</h2>
+  <div class="card">
+    <strong>Android (Chrome)</strong>
+    <ol>
+      <li>Abra <em>Configurações</em> e procure por <em>“Certificado”</em>.</li>
+      <li>Vá em <em>Segurança › Criptografia e credenciais › Instalar um certificado › Certificado de CA</em> (o caminho varia conforme a marca).</li>
+      <li>Toque em <em>“Instalar mesmo assim”</em> e escolha o arquivo <code>chama-ai-ca.crt</code> em <em>Downloads</em>.</li>
+    </ol>
+    <p class="muted" style="margin-top:10px">O Android pode mostrar um aviso fixo de “rede pode estar sendo monitorada”. É normal para qualquer certificado instalado por você.</p>
+  </div>
+  <div class="card">
+    <strong>iPhone / iPad (Safari)</strong>
+    <ol>
+      <li>Toque em <em>Permitir</em> quando o Safari avisar sobre o perfil.</li>
+      <li><em>Ajustes › Perfil baixado › Instalar</em>.</li>
+      <li><em>Ajustes › Geral › Sobre › Ajustes de Confiança de Certificado</em> e ative <em>“Chama Ai Local Dev CA”</em>.</li>
+    </ol>
+  </div>
+
+  <h2>3. Abrir o app por https</h2>
+  <div class="card">
+    <a class="btn primary" id="go" href="#">Abrir o Chama Aí (https)</a>
+    <p class="muted" style="margin-top:12px">Depois, no Chrome: menu ⋮ › <em>Instalar app</em> (ou o botão “Instalar” do próprio app).</p>
+  </div>
+
+  <p class="muted" style="margin-top:24px">Este certificado só vale para endereços da rede local (IPs privados, localhost e *.local). Remova-o quando não precisar mais.</p>
+</main>
+<script>document.getElementById("go").href = "https://" + location.hostname + ":__HTTPS_PORT__/";</script>
+</body>
+</html>

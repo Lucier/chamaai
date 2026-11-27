@@ -1,0 +1,96 @@
+name: chama-ai
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-chamaai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      POSTGRES_DB: ${POSTGRES_DB:-chamaai}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      # Só na máquina local — para `npm run dev` / psql. Remova em produção.
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
+
+  # Aplica as migrações e garante o admin. Roda e termina; o app só sobe depois.
+  migrate:
+    build:
+      context: .
+      target: builder
+    command: sh -c "npm run db:migrate && npm run admin:create"
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-chamaai}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-chamaai}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    build:
+      context: .
+      target: runner
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-chamaai}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-chamaai}
+      UPLOAD_DIR: /data/uploads
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      SESSION_TTL_DAYS: ${SESSION_TTL_DAYS:-7}
+      JWT_SECRET: "${JWT_SECRET:?defina JWT_SECRET no .env - gere com openssl rand -base64 48}"
+    volumes:
+      - uploads:/data/uploads
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  # HTTPS local (opcional, perfil "https"): termina TLS com o certificado gerado por
+  # `bash scripts/https/setup.sh` e repassa ao app. Necessário para INSTALAR o PWA no celular.
+  #   https://<ip>:8443  -> o app          http://<ip>:8080 -> baixar a CA (instalar no celular)
+  # As portas > 1024 evitam mexer no firewall; o Docker publica em 0.0.0.0 (acessível na rede local).
+  proxy:
+    profiles: ["https"]
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    ports:
+      - "${HTTPS_PORT:-8443}:8443"
+      - "${CA_PORT:-8080}:8080"
+    volumes:
+      # create_host_path: false -> se faltar rodar o setup.sh, o compose reclama em vez de criar pastas vazias.
+      # selinux: z -> necessário no Fedora para o container ler os arquivos montados.
+      - type: bind
+        source: ./deploy/Caddyfile
+        target: /etc/caddy/Caddyfile
+        read_only: true
+        bind: { create_host_path: false, selinux: z }
+      - type: bind
+        source: ./certs/tls
+        target: /certs
+        read_only: true
+        bind: { create_host_path: false, selinux: z }
+      - type: bind
+        source: ./certs/web
+        target: /srv/web
+        read_only: true
+        bind: { create_host_path: false, selinux: z }
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/ca.crt"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+  uploads:

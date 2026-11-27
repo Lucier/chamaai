@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.env
+.env.*
+!.env.example
+uploads
+certs
+deploy
+coverage
+chama-ai.html
+supabase-setup.sql
+legacy
+*.md
+Dockerfile
+docker-compose*.yml

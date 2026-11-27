@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+/* Tokens de design — mesma paleta do protótipo em HTML. */
+@theme {
+  /* Mesmo ponto de quebra (1000px) do protótipo para filtros em linha, cadastro em 2 colunas e 4 métricas. */
+  --breakpoint-wide: 62.5625rem; /* 1001px — em rem p/ o Tailwind ordenar junto com md/lg */
+
+  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-surface: #f4f7f8;
+  --color-card: #ffffff;
+  --color-ink: #10242b;
+  --color-muted: #5b6b72;
+  --color-primary: #0f6b73;
+  --color-primary-soft: #e6f1f2;
+  --color-accent: #e8772e;
+  --color-success: #16a34a;
+  --color-success-soft: #ecfdf3;
+  --color-danger: #dc2626;
+  --color-danger-soft: #fef2f2;
+  --color-line: #e5e7eb;
+  --color-wa: #1faf54;
+  --color-star: #f5a524;
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-lift: 0 10px 28px rgba(16, 36, 43, 0.13);
+  --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.25);
+
+  --animate-shimmer: shimmer 1.3s ease infinite;
+  --animate-fade-in: fade-in 0.2s ease;
+  --animate-rise: rise 0.25s ease;
+
+  @keyframes shimmer {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes rise {
+    from { transform: translateY(12px); opacity: 0.6; }
+    to { transform: none; opacity: 1; }
+  }
+}
+
+/* Telas estreitas (só na tela, nunca na impressão): tabelas do admin viram cartões empilhados. */
+@custom-variant narrow (@media screen and (width < 48rem));
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Toque: sem o flash cinza padrão do navegador (os botões já têm estado :active próprio). */
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    /* dvh: no celular, 100vh inclui a barra de endereço e empurrava o rodapé para fora da tela. */
+    @apply min-h-dvh bg-surface font-sans text-[15px] leading-[1.55] text-ink antialiased;
+  }
+  h1 { @apply text-2xl leading-tight font-bold tracking-tight; }
+  h2 { @apply text-lg leading-snug font-semibold; }
+  h3 { @apply text-base leading-snug font-semibold; }
+  /* Nome/URL/descrição sem espaços (cadastro livre) não pode alargar a tela. */
+  h1, h2, h3, p { overflow-wrap: anywhere; }
+  button, [role="button"], summary { cursor: pointer; }
+  button:disabled { cursor: not-allowed; }
+  /* Sem o atraso de ~300 ms e sem zoom por duplo toque em controles. */
+  a, button, input, select, textarea, label, summary, [role="radio"] { touch-action: manipulation; }
+  :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+}
+
+@layer components {
+  /* Seta do <select> (o appearance nativo é desligado para o visual ficar igual em todos os navegadores). */
+  .select-arrow {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235B6B72' d='M6 8 0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+  }
+  /* Faixa que rola na horizontal (chips de categoria/abas): sem barra de rolagem e sem encadear a rolagem da página. */
+  .chip-row {
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .chip-row::-webkit-scrollbar { display: none; }
+  /* Esqueleto de carregamento. */
+  .skeleton {
+    background: linear-gradient(90deg, #eef1f2 25%, #f6f8f9 37%, #eef1f2 63%);
+    background-size: 400% 100%;
+    @apply animate-shimmer rounded-lg;
+  }
+}
+
+/* Impressão / PDF do painel do admin. */
+@media print {
+  html, body { background: #fff !important; color: #000 !important; }
+  * { box-shadow: none !important; }
+  .print-card { border: 1px solid #ccc; background: #fff !important; }
+}
